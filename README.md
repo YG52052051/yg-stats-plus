@@ -1,124 +1,121 @@
 # Stats
 
-<a href="https://github.com/exelban/stats/releases"><p align="center"><img src="https://github.com/exelban/stats/raw/master/Stats/Supporting%20Files/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" width="120"></p></a>
+<a href="https://github.com/YG52052051/yg-stats-plus/releases"><p align="center"><img src="https://github.com/exelban/stats/raw/master/Stats/Supporting%20Files/Assets.xcassets/AppIcon.appiconset/icon_256x256.png" width="120"></p></a>
 
-[![Stats](https://serhiy.s3.eu-central-1.amazonaws.com/Github_repo/stats/menus%3Fv2.3.2.png?v1)](https://github.com/exelban/stats/releases)
-[![Stats](https://serhiy.s3.eu-central-1.amazonaws.com/Github_repo/stats/popups%3Fv2.3.2.png?v3)](https://github.com/exelban/stats/releases)
+macOS 菜单栏系统监控工具
 
-macOS system monitor in your menu bar
+## 安装
 
-## Installation
-### Manual
-You can download the latest version [here](https://github.com/exelban/stats/releases/latest/download/Stats.dmg).
-This will download a file called `Stats.dmg`. Open it and move the app to the application folder.
+### 从 GitHub Actions 下载
+1. 访问 [Actions](https://github.com/YG52052051/yg-stats-plus/actions) 页面
+2. 点击最新的成功构建
+3. 在 "Artifacts" 区域下载 `Stats-macOS`
+4. 解压后右键点击 `Stats.app` → 打开（首次启动）
 
-### Homebrew
-To install it using Homebrew, open the Terminal app and type:
+### Homebrew（原版）
 ```bash
 brew install stats
 ```
 
-### Legacy version
-Legacy version for older systems could be found [here](https://mac-stats.com/downloads).
+## 系统要求
 
-## Requirements
-Stats is supported on the released macOS version starting from macOS 11.15 (Big Sur).
+- macOS 14.0 (Sonoma) 或更高版本
 
-## Features
-Stats is an application that allows you to monitor your macOS system.
+## 功能特性
 
- - CPU utilization
- - GPU utilization
- - Memory usage
- - Disk utilization
- - Network usage
- - Battery level
- - Fan's control (not maintained)
- - Sensors information (Temperature/Voltage/Power)
- - Bluetooth devices
- - Multiple time zone clock
+Stats 是一款 macOS 系统监控应用，可以在菜单栏显示各种系统信息：
 
-## FAQs
+- **CPU** - 利用率、温度、频率
+- **GPU** - 利用率、温度
+- **内存** - 使用情况、压力
+- **磁盘** - 读写速度、容量
+- **网络** - 带宽、连接状态
+- **电池** - 电量、健康度
+- **传感器** - 温度、电压、功率
+- **蓝牙** - 设备连接状态
+- **时钟** - 多时区显示
 
-### How do you change the order of the menu bar icons?
-macOS decides the order of the menu bar items not `Stats` - it may change after the first reboot after installing Stats.
+## 🆕 新增功能：进程流量历史记录
 
-To change the order of any menu bar icon - macOS Mojave (version 10.14) and up.
+### 功能说明
+记录每个应用的网络流量使用情况，支持历史趋势查看。
 
-1. Hold down ⌘ (command key).
-2. Drag the icon to the desired position on the menu bar.
-3. Release ⌘ (command key)
+**特点：**
+- 按 **10分钟** 粒度记录流量数据
+- 每 **5分钟** 自动保存
+- 支持查看任意时间段的历史数据
+- **趋势图** 可视化展示流量变化
 
-### How to reduce energy impact or CPU usage of Stats?
-Stats tries to be efficient as it's possible. But reading some data periodically is not a cheap task. Each module has its own "price". So, if you want to reduce energy impact from the Stats you need to disable some Stats modules. The most inefficient modules are Sensors and Bluetooth. Disabling these modules could reduce CPU usage and power efficiency by up to 50% in some cases.
+### 数据文件位置
+```
+~/Library/Application Support/Stats/traffic_history.json
+```
 
-### Fan control
-Fan control is in legacy mode. It does not receive any updates or fixes. It's not dropped from the app just because in the old Macs it works pretty acceptable. I'm open to accepting fixed or improvements (via PR) for this feature in case someone would like to help with that. But have no option and time to provide support for this feature.
+### 查看流量数据
 
-### Sensors show incorrect CPU/GPU core count
-CPU/GPU sensors are simply thermal zones (sensors) on the CPU/GPU. They have no relation to the number of cores or specific cores.
-For example, a CPU is typically divided into two clusters: efficiency and performance. Each cluster contains multiple temperature sensors, and Stats simply displays these sensors. However, "CPU Efficient Core 1" does not represent the temperature of a single efficient core—it only indicates one of the temperature sensors within the efficiency core cluster.
-Additionally, with each new SoC, Apple changes the sensor keys. As a result, it takes time to determine which SMC values correspond to the appropriate sensors. If anyone knows how to accurately match the sensors for Apple Silicon, please contact me.
+1. **打开 HTML 查看器**
+   ```
+   tools/traffic_viewer.html
+   ```
 
-### App crash – what to do?
-First, ensure that you are using the latest version of Stats. There is a high chance that a fix preventing the crash has already been released. If you are already running the latest version, check the open issues. Only if none of the existing issues address your problem should you open a new issue.
+2. **拖拽 JSON 文件** 到网页中
 
-### Why my issue was closed without any response?
-Most probably because it's a duplicated issue and there is an answer to the question, report, or proposition. Please use a search by closed issues to get an answer.
-So, if your issue was closed without any response, most probably it already has a response.
+3. **功能说明**
+   - 📊 统计卡片：显示总下载/上传/流量/进程数
+   - 📅 日期筛选：按日期过滤数据
+   - 📈 趋势图：点击进程名称查看流量趋势（最多5个）
+   - 📋 排行榜：按流量使用量排序
 
-### External API
-Stats uses some external APIs, such as:
+### 数据结构示例
+```json
+{
+  "2026-03-20": {
+    "19:20": {
+      "微信_1275": {"name": "微信", "pid": 1275, "download": 50000000, "upload": 10000000}
+    },
+    "19:30": {
+      "微信_1275": {"name": "微信", "pid": 1275, "download": 30000000, "upload": 5000000}
+    }
+  }
+}
+```
 
-- https://api.mac-stats.com – For update checks and retrieving the public IP address
-- https://api.github.com – Fallback for update checks
+## 常见问题
 
-Both of these APIs are used to check for updates. Additionally, an external request is required to obtain the public IP address. I do not want to use any third-party providers for retrieving the public IP address, so I use my own server for this purpose.
+### 如何调整菜单栏图标顺序？
+macOS 决定菜单栏图标的顺序：
+1. 按住 ⌘ (Command 键)
+2. 拖动图标到想要的位置
+3. 松开 ⌘
 
-If you have concerns about these requests, you have a few options:
+### 如何降低 CPU 占用？
+最耗资源的模块是 **传感器** 和 **蓝牙**。禁用这些模块可以显著降低 CPU 占用。
 
-- propose a PR that allows these features to work without an external server
-- block both of these servers using any network filtering app (if you're reading this, you're likely using something like Little Snitch, so you can easily do this). In this case do not expect to receive any updates or see your public IP in the network module.
+### 应用崩溃怎么办？
+1. 确保使用最新版本
+2. 查看 [Issues](https://github.com/YG52052051/yg-stats-plus/issues) 是否有相关问题
 
+## 支持的语言
 
-## Supported languages
+- 简体中文
+- 繁体中文
 - English
-- Polski
-- Українська
+- 日本語
+- 한국어
 - Русский
-- 中文 (简体) (thanks to [chenguokai](https://github.com/chenguokai), [Tai-Zhou](https://github.com/Tai-Zhou), and [Jerry](https://github.com/Jerry23011))
-- Türkçe (thanks to [yusufozgul](https://github.com/yusufozgul) and [setanarut](https://github.com/setanarut))
-- 한국어 (thanks to [escapeanaemia](https://github.com/escapeanaemia) and [iamhslee](https://github.com/iamhslee))
-- German (thanks to [natterstefan](https://github.com/natterstefan) and [aneitel](https://github.com/aneitel))
-- 中文 (繁體) (thanks to [iamch15542](https://github.com/iamch15542) and [jrthsr700tmax](https://github.com/jrthsr700tmax))
-- Spanish (thanks to [jcconca](https://github.com/jcconca))
-- Vietnamese (thanks to [HXD.VN](https://github.com/xuandung38))
-- French (thanks to [RomainLt](https://github.com/RomainLt))
-- Italian (thanks to [gmcinalli](https://github.com/gmcinalli))
-- Portuguese (Brazil) (thanks to [marcelochaves95](https://github.com/marcelochaves95) and [pedroserigatto](https://github.com/pedroserigatto))
-- Norwegian Bokmål (thanks to [rubjo](https://github.com/rubjo))
-- 日本語 (thanks to [treastrain](https://github.com/treastrain))
-- Portuguese (Portugal) (thanks to [AdamModus](https://github.com/AdamModus))
-- Czech (thanks to [mpl75](https://github.com/mpl75))
-- Magyar (thanks to [moriczr](https://github.com/moriczr))
-- Bulgarian (thanks to [zbrox](https://github.com/zbrox))
-- Romanian (thanks to [razluta](https://github.com/razluta))
-- Dutch (thanks to [ngohungphuc](https://github.com/ngohungphuc))
-- Hrvatski (thanks to [milotype](https://github.com/milotype))
-- Danish (thanks to [casperes1996](https://github.com/casperes1996) and [aleksanderbl29](https://github.com/aleksanderbl29))
-- Catalan (thanks to [davidalonso](https://github.com/davidalonso))
-- Indonesian (thanks to [yooody](https://github.com/yooody))
-- Hebrew (thanks to [BadSugar](https://github.com/BadSugar))
-- Slovenian (thanks to [zigapovhe](https://github.com/zigapovhe))
-- Greek (thanks to [sudoxcess](https://github.com/sudoxcess) and [vaionicle](https://github.com/vaionicle))
-- Persian (thanks to [ShawnAlisson](https://github.com/ShawnAlisson))
-- Slovenský (thanks to [martinbernat](https://github.com/martinbernat))
-- Thai (thanks to [apiphoomchu](https://github.com/apiphoomchu))
-- Estonian (thanks to [postylem](https://github.com/postylem))
-- Hindi (thanks to [patiljignesh](https://github.com/patiljignesh))
-- Finnish (thanks to [eightscrow](https://github.com/eightscrow))
+- Українська
+- Polski
+- Deutsch
+- Français
+- Español
+- Italiano
+- Português
+- 等更多...
 
-You can help by adding a new language or improving the existing translation.
+## 许可证
 
-## License
-[MIT License](https://github.com/exelban/stats/blob/master/LICENSE)
+[MIT License](LICENSE)
+
+## 致谢
+
+本项目基于 [exelban/stats](https://github.com/exelban/stats) 开发，感谢原作者的贡献。
