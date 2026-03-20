@@ -563,7 +563,23 @@ typealias ProcessTrafficBucket = [String: ProcessTrafficRecord]
 public class ProcessReader: Reader<[Network_Process]> {
     private let title: String = "Network"
     private var previous: [Network_Process] = []
-    
+
+    // Traffic history storage
+    private var _currentHourBucket: ProcessTrafficBucket = [:]
+    private var _currentHourKey: String = ""
+    private let trafficQueue = DispatchQueue(label: "eu.exelban.ProcessTrafficQueue")
+    private let trafficDBKey = "process_traffic"
+
+    private var currentHourBucket: ProcessTrafficBucket {
+        get { self.trafficQueue.sync { self._currentHourBucket } }
+        set { self.trafficQueue.sync { self._currentHourBucket = newValue } }
+    }
+
+    private var currentHourKey: String {
+        get { self.trafficQueue.sync { self._currentHourKey } }
+        set { self.trafficQueue.sync { self._currentHourKey = newValue } }
+    }
+
     private var numberOfProcesses: Int {
         get {
             return Store.shared.int(key: "\(self.title)_processes", defaultValue: 8)
