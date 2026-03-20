@@ -713,6 +713,61 @@ public class ProcessReader: Reader<[Network_Process]> {
         
         self.callback(processes.suffix(self.numberOfProcesses).reversed())
     }
+
+    // MARK: - Traffic History
+
+    private func recordTraffic(_ processes: [Network_Process]) {
+        let now = Date()
+        let hourKey = self.getHourKey(now)
+
+        // 检测小时切换
+        if self.currentHourKey != hourKey {
+            if !self.currentHourKey.isEmpty {
+                self.saveBucket(self.currentHourKey, self.currentHourBucket)
+            }
+            self.currentHourKey = hourKey
+            self.currentHourBucket = [:]
+        }
+
+        // 累加流量
+        for process in processes {
+            let uniqueKey = "\(process.name)_\(process.pid)"
+            if self.currentHourBucket[uniqueKey] == nil {
+                self.currentHourBucket[uniqueKey] = ProcessTrafficRecord(
+                    name: process.name,
+                    pid: process.pid
+                )
+            }
+            self.currentHourBucket[uniqueKey]?.download += Int64(process.download)
+            self.currentHourBucket[uniqueKey]?.upload += Int64(process.upload)
+        }
+    }
+
+    private func getHourKey(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd|HH"
+        return "\(self.trafficDBKey)|\(formatter.string(from: date))"
+    }
+
+    private func saveBucket(_ key: String, _ bucket: ProcessTrafficBucket) {
+        guard !bucket.isEmpty else { return }
+        do {
+            let data = try JSONEncoder().encode(bucket)
+            guard let json = String(data: data, encoding: .utf8) else { return }
+            let success = DB.shared.lldb?.insert(key, value: json) ?? false
+            if !success {
+                debug("Failed to save process traffic bucket: \(key)")
+            }
+        } catch {
+            debug("Failed to encode process traffic bucket: \(error)")
+        }
+    }
+
+    public override func terminate() {
+        if !self.currentHourKey.isEmpty && !self.currentHourBucket.isEmpty {
+            self.saveBucket(self.currentHourKey, self.currentHourBucket)
+        }
+    }
 }
 
 internal class ConnectivityReaderWrapper {
