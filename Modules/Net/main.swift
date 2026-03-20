@@ -226,7 +226,11 @@ public class Network: Module {
         self.setIPUpdater()
         self.setUsageReset()
     }
-    
+
+    deinit {
+        self.processReader?.terminate()
+    }
+
     public override func isAvailable() -> Bool {
         var list: [String] = []
         for interface in SCNetworkInterfaceCopyAll() as NSArray {
