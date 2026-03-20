@@ -1,0 +1,511 @@
+//
+//  Localizable.strings
+//  Stats
+//
+//  Created by Phúc Ngô on 02/04/2021.
+//
+//  Running on macOS Big Sur M1.
+//
+//  Copyright © 2021 Serhiy Mytrovtsiy. All rights reserved.
+//
+
+// Modules
+"CPU" = "CPU";
+"Open CPU settings" = "Open CPU instellingen";
+"GPU" = "GPU";
+"Open GPU settings" = "Open GPU instellingen";
+"RAM" = "RAM";
+"Open RAM settings" = "Open RAM instellingen";
+"Disk" = "Schijf"; // translategemma:4b
+"Open Disk settings" = "Open disk instellingen";
+"Sensors" = "Sensoren"; // translategemma:4b
+"Open Sensors settings" = "Open sensors instellingen";
+"Network" = "Netwerk"; // translategemma:4b
+"Open Network settings" = "Open network instellingen";
+"Battery" = "Batterij"; // translategemma:4b
+"Open Battery settings" = "Open battery instellingen";
+"Bluetooth" = "Bluetooth";
+"Open Bluetooth settings" = "Open bluetooth instellingen";
+"Clock" = "Uur"; // translategemma:4b
+"Open Clock settings" = "Open de instellingen voor de klok"; // translategemma:4b
+
+// Words
+"Unknown" = "Onbekend";
+"Version" = "Versie";
+"Processor" = "Processor";
+"Memory" = "Geheugen";
+"Graphics" = "Grafisch";
+"Close" = "Sluiten";
+"Download" = "Download";
+"Install" = "Installeren";
+"Cancel" = "Annuleren";
+"Unavailable" = "Onbereikbaar";
+"Yes" = "Ja";
+"No" = "Nee";
+"Automatic" = "Automatisch";
+"Manual" = "Handmatig";
+"None" = "Geen";
+"Dots" = "Punten"; // translategemma:4b
+"Arrows" = "Pijlen";
+"Characters" = "Tekens";
+"Short" = "Kort";
+"Long" = "Lang";
+"Statistics" = "Statistieken";
+"Max" = "Maximaal";
+"Min" = "Min";
+"Reset" = "Herstellen"; // translategemma:4b
+"Alignment" = "Uitlijning";
+"Left alignment" = "Links";
+"Center alignment" = "Midden";
+"Right alignment" = "Rechts";
+"Dashboard" = "Dashboard";
+"Enabled" = "Aanwezig"; // translategemma:4b
+"Disabled" = "Uitgeschakeld";
+"Silent" = "Stil"; // translategemma:4b
+"Units" = "Eenheden"; // translategemma:4b
+"Fans" = "Fans";
+"Scaling" = "Schaalbaarheid"; // translategemma:4b
+"Linear" = "Lineair"; // translategemma:4b
+"Square" = "Vierkant"; // translategemma:4b
+"Cube" = "Kubus"; // translategemma:4b
+"Logarithmic" = "Logaritmisch"; // translategemma:4b
+"Fixed scale" = "Opgelost"; // translategemma:4b
+"Cores" = "Kernen"; // translategemma:4b
+"Settings" = "Instellingen"; // translategemma:4b
+"Name" = "Naam"; // translategemma:4b
+"Format" = "Formaat"; // translategemma:4b
+"Turn off" = "Uitschakelen"; // translategemma:4b
+"Normal" = "Normaal"; // translategemma:4b
+"Warning" = "Waarschuwing"; // translategemma:4b
+"Critical" = "Cruciaal"; // translategemma:4b
+"Usage" = "Gebruik"; // translategemma:4b
+"2 minutes" = "2 minuten"; // translategemma:4b
+"3 minutes" = "3 minuten"; // translategemma:4b
+"10 minutes" = "10 minuten"; // translategemma:4b
+"Import" = "Importeren"; // translategemma:4b
+"Export" = "Exporter"; // translategemma:4b
+"Separator" = "Scheiding"; // translategemma:4b
+"Read" = "Lees"; // translategemma:4b
+"Write" = "Schrijf"; // translategemma:4b
+"Frequency" = "Frequentie"; // translategemma:4b
+"Save" = "Opslaan"; // translategemma:4b
+"Run" = "Uitvoeren"; // translategemma:4b
+"Stop" = "Stoppen"; // translategemma:4b
+"Uninstall" = "Verwijderen"; // translategemma:4b
+"1 sec" = "1 seconde"; // translategemma:4b
+"2 sec" = "2 second"; // translategemma:4b
+"3 sec" = "3 seconden"; // translategemma:4b
+"5 sec" = "5 seconden"; // translategemma:4b
+"10 sec" = "10 sec";
+"15 sec" = "15 sec";
+"30 sec" = "30 seconden"; // translategemma:4b
+"60 sec" = "60 seconden"; // translategemma:4b
+
+// Setup
+"Stats Setup" = "Instellingen instellen"; // translategemma:4b
+"Previous" = "Vorige"; // translategemma:4b
+"Previous page" = "Vorige pagina"; // translategemma:4b
+"Next" = "Volgende"; // translategemma:4b
+"Next page" = "Volgende pagina"; // translategemma:4b
+"Finish" = "Afmaken"; // translategemma:4b
+"Finish setup" = "Voltooi de installatie"; // translategemma:4b
+"Welcome to Stats" = "Welkom bij Stats"; // translategemma:4b
+"welcome_message" = "Bedankt voor het gebruik van Stats, een gratis en open-source macOS-systeemmonitor voor uw menubalk."; // translategemma:4b
+"Start the application automatically when starting your Mac" = "Start de applicatie automatisch wanneer u uw Mac opstart."; // translategemma:4b
+"Do not start the application automatically when starting your Mac" = "Start de applicatie niet automatisch wanneer u uw Mac opstart."; // translategemma:4b
+"Do everything silently in the background (recommended)" = "Voer alles discreet uit op de achtergrond (aanbevolen)"; // translategemma:4b
+"Check for a new version on startup" = "Controleer op het opstarten of er een nieuwe versie beschikbaar is."; // translategemma:4b
+"Check for a new version every day (once a day)" = "Controleer dagelijks op een nieuwe versie (een keer per dag)"; // translategemma:4b
+"Check for a new version every week (once a week)" = "Controleer wekelijks op een nieuwe versie (één keer per week)"; // translategemma:4b
+"Check for a new version every month (once a month)" = "Controleer maandelijks (één keer per maand) op een nieuwe versie."; // translategemma:4b
+"Never check for updates (not recommended)" = "Controleer nooit op updates (niet aanbevolen)"; // translategemma:4b
+"Anonymous telemetry for better development decisions" = "Anonieme telemetrie voor betere beslissingen tijdens de ontwikkeling"; // translategemma:4b
+"Share anonymous telemetry data" = "Deel anonieme telemetriegegevens"; // translategemma:4b
+"Do not share anonymous telemetry data" = "Deel geen anonieme telemetriegegevens."; // translategemma:4b
+"The configuration is completed" = "De configuratie is voltooid."; // translategemma:4b
+"finish_setup_message" = "Alles is klaar!"; // translategemma:4b
+
+// Alerts
+"New version available" = "Nieuwe versie beschikbaar";
+"Click to install the new version of Stats" = "Klik om de nieuwe versie van Stats te installeren";
+"Successfully updated" = "Succesvol geüpdatet";
+"Stats was updated to v" = "Stats is bijgewerkt naar v%0";
+"Reset settings text" = "Alle applicatie instellingen worden gereset en de applicatie wordt opnieuw opgestart. Weet u zeker dat u dit wilt doen?";
+"Support text" = "Bedankt voor het gebruik van Stats! Het onderhouden en verbeteren van dit open-source project kost tijd en middelen. Als je Stats nuttig vindt, overweeg dan alsjeblieft om een bijdrage te leveren. Alle beetjes helpen!";
+
+// Settings
+"Open Activity Monitor" = "Open Activiteitenweergave";
+"Report a bug" = "Meld een bug";
+"Support the application" = "Ondersteun de applicatie";
+"Close application" = "Applicatie sluiten";
+"Open application settings" = "Open de applicatie-instellingen";
+"Open dashboard" = "Open dashboard";
+"No notifications available in this module" = "Geen meldingen beschikbaar in dit module"; // translategemma:4b
+"Open Calendar" = "Open Kalender"; // translategemma:4b
+"Toggle the module" = "Activeer/deactiveer het module"; // translategemma:4b
+
+// Application settings
+"Update application" = "Applicatie bijwerken";
+"Check for updates" = "Controleer op updates";
+"At start" = "Bij het opstarten";
+"Once per day" = "Eenmaal per dag";
+"Once per week" = "Eenmaal per week";
+"Once per month" = "Eenmaal per maand";
+"Never" = "Nooit";
+"Check for update" = "Controleer op updates";
+"Show icon in dock" = "Pictogram in dock weergeven";
+"Start at login" = "Starten bij inloggen";
+"Build number" = "Bouwnummer"; // translategemma:4b
+"Import settings" = "Importer instellingen"; // translategemma:4b
+"Export settings" = "Exporteerinstellingen"; // translategemma:4b
+"Reset settings" = "Instellingen herstellen"; // translategemma:4b
+"Pause the Stats" = "Pauzeer de statistieken"; // translategemma:4b
+"Resume the Stats" = "Herhaal de statistieken"; // translategemma:4b
+"Combined modules" = "Gecombineerde modules"; // translategemma:4b
+"Combined details" = "Gezamenlijke details"; // translategemma:4b
+"Spacing" = "Ruimte"; // translategemma:4b
+"Share anonymous telemetry" = "Deel anonieme telemetriegegevens"; // translategemma:4b
+"Choose file" = "Kies bestand"; // translategemma:4b
+"Stress tests" = "Stress tests";
+
+// Dashboard
+"Serial number" = "Serienummer";
+"Model identifier" = "Model-identificatie"; // translategemma:4b
+"Production year" = "Jaar van productie"; // translategemma:4b
+"Uptime" = "Beschikbaarheid";
+"Number of cores" = "%0 kernen"; // translategemma:4b
+"Number of threads" = "%0 threads";
+"Number of e-cores" = "%0 efficiënte kernen"; // translategemma:4b
+"Number of p-cores" = "%0 prestatiecores"; // translategemma:4b
+"Disks" = "Schijven"; // translategemma:4b
+"Display" = "Weergave"; // translategemma:4b
+
+// Update
+"The latest version of Stats installed" = "De laatste versie van Stats is geïnstalleerd.";
+"Downloading..." = "Aan het downloaden...";
+"Current version: " = "Huidige versie:  ";
+"Latest version: " = "Nieuwste versie:    ";
+
+// Widgets
+"Color" = "Kleur";
+"Label" = "Label";
+"Box" = "Doos"; // translategemma:4b
+"Frame" = "Frame";
+"Value" = "Waarde";
+"Colorize" = "Inkleuren";
+"Colorize value" = "Inkleuren waarde";
+"Additional information" = "Extra informatie";
+"Reverse values order" = "Waarden in omgekeerde volgorde";
+"Base" = "Basis";
+"Display mode" = "Weergavemodus";
+"One row" = "Een rij";
+"Two rows" = "Twee rijen";
+"Mini widget" = "Miniwidget";
+"Line chart widget" = "Lijngrafiek";
+"Bar chart widget" = "Staafgrafiek";
+"Pie chart widget" = "Taartgrafiek";
+"Network chart widget" = "Netwerkgrafiek";
+"Speed widget" = "Snelheidswidget";
+"Battery widget" = "Batterijwidget";
+"Stack widget" = "Stack";
+"Memory widget" = "Geheugenwidget";
+"Static width" = "Vaste breedte"; // translategemma:4b
+"Tachometer widget" = "Snelheidsmeter"; // translategemma:4b
+"State widget" = "Statuswidget"; // translategemma:4b
+"Text widget" = "Tekstwidget"; // translategemma:4b
+"Battery details widget" = "Widget met batterijgegevens"; // translategemma:4b
+"Show symbols" = "Toon symbolen";
+"Label widget" = "Label";
+"Number of reads in the chart" = "Aantal keer gelezen in de grafiek";
+"Color of download" = "Kleur van download";
+"Color of upload" = "Kleur van upload";
+"Monospaced font" = "Monospaced lettertype";
+"Reverse order" = "Omgekeerde volgorde"; // translategemma:4b
+"Chart history" = "Historie van de grafiek"; // translategemma:4b
+"Default color" = "Standaard"; // translategemma:4b
+"Transparent when no activity" = "Transparant wanneer er geen activiteit is"; // translategemma:4b
+"Constant color" = "Constante"; // translategemma:4b
+
+// Module Kit
+"Open module settings" = "Open module-instellingen";
+"Select widget" = "Selecteer %0 widget";
+"Open widget settings" = "Open widget-instellingen";
+"Update interval" = "Bijwerkings-interval";
+"Usage history" = "Gebruiksgeschiedenis";
+"Details" = "Details";
+"Top processes" = "Topprocessen";
+"Pictogram" = "Pictogram";
+"Module" = "Module";
+"Widgets" = "Widgets";
+"Popup" = "Pop-up";
+"Notifications" = "Meddelelser";
+"Merge widgets" = "Widgets samenvoegen";
+"No available widgets to configure" = "Geen beschikbare widgets om te configureren";
+"No options to configure for the popup in this module" = "Meervoudige configuratie voor pop-op-vinduet en deze module";
+"Process" = "Proces"; // translategemma:4b
+"Kill process" = "Beëindig proces"; // translategemma:4b
+"Keyboard shortcut" = "Sneltoets"; // translategemma:4b
+"Listening..." = "Luisteren..."; // translategemma:4b
+
+// Modules
+"Number of top processes" = "Aantal topprocessen";
+"Update interval for top processes" = "Bewerk interval voor top processen";
+"Notification level" = "Meldingsniveau";
+"Chart color" = "Kortfarve";
+"Main chart scaling" = "Hoofdschaal schaal"; // translategemma:4b
+"Scale value" = "Waarde"; // translategemma:4b
+"Text widget value" = "Waarde van het tekstwidget-element"; // translategemma:4b
+
+// CPU
+"CPU usage" = "CPU gebruik";
+"CPU temperature" = "CPU temperatuur";
+"CPU frequency" = "CPU frequentie";
+"System" = "Systeem";
+"User" = "Gebruiker";
+"Idle" = "Inactief";
+"Show usage per core" = "Gebruik per core weergeven";
+"Show hyper-threading cores" = "Hyperthreading cores weergeven";
+"Split the value (System/User)" = "Opdel værdien (Systeem/Gebruiker)";
+"Scheduler limit" = "Planner limiet";
+"Speed limit" = "Snelheidslimiet";
+"Average load" = "Gemiddelde belasting ";
+"1 minute" = "1 minuut";
+"5 minutes" = "5 minuten";
+"15 minutes" = "15 minuten";
+"CPU usage threshold" = "Drempelwaarde voor CPU-gebruik"; // translategemma:4b
+"CPU usage is" = "Het CPU-gebruik is %0"; // translategemma:4b
+"Efficiency cores" = "Efficiënte kernen"; // translategemma:4b
+"Performance cores" = "Prestatie-cores"; // translategemma:4b
+"System color" = "Kleur van het systeem"; // translategemma:4b
+"User color" = "Kleur van de gebruiker"; // translategemma:4b
+"Idle color" = "Kleur in ruststand"; // translategemma:4b
+"Cluster grouping" = "Groeperen van clusters"; // translategemma:4b
+"Efficiency cores color" = "Kleuren van de kernen voor efficiëntie"; // translategemma:4b
+"Performance cores color" = "Kleur van de prestatie-cores"; // translategemma:4b
+"Total load" = "Totale belasting"; // translategemma:4b
+"System load" = "Laad op het systeem"; // translategemma:4b
+"User load" = "Gebruikersbelasting"; // translategemma:4b
+"Efficiency cores load" = "Efficiëntie-cores laden"; // translategemma:4b
+"Performance cores load" = "Laad van de prestatie-cores"; // translategemma:4b
+"All cores" = "Alle kernen"; // translategemma:4b
+
+// GPU
+"GPU to show" = "GPU om te laten zien";
+"Show GPU type" = "GPU-type weergeven";
+"GPU enabled" = "GPU ingeschakeld";
+"GPU disabled" = "GPU uitgeschakeld";
+"GPU temperature" = "GPU-temperatuur";
+"GPU utilization" = "GPU-gebruik";
+"Vendor" = "Fabrikant";
+"Model" = "Model";
+"Status" = "Status";
+"Active" = "Actief";
+"Non active" = "Niet actief";
+"Fan speed" = "Ventilatorsneelheid";
+"Core clock" = "Core klok";
+"Memory clock" = "Geheugen klok";
+"Utilization" = "Benutting";
+"Render utilization" = "Gebruik van render-resources"; // translategemma:4b
+"Tiler utilization" = "Optimal gebruik van tegelwerk"; // translategemma:4b
+"GPU usage threshold" = "Drempelwaarde voor GPU-gebruik"; // translategemma:4b
+"GPU usage is" = "Het gebruik van de GPU bedraagt %0"; // translategemma:4b
+
+// RAM
+"Memory usage" = "Geheugengebruik";
+"Memory pressure" = "Geheugendruk";
+"Total" = "Totaal";
+"Used" = "Gebruikt";
+"App" = "App";
+"Wired" = "Bedraad"; // translategemma:4b
+"Compressed" = "Gecomprimeerd";
+"Free" = "Vrij";
+"Swap" = "Swap";
+"Split the value (App/Wired/Compressed)" = "Opdel værdien (App/Wired/Gecomprimeerd)";
+"RAM utilization threshold" = "Drempelwaarde voor het gebruik van RAM"; // translategemma:4b
+"RAM utilization is" = "Het gebruik van RAM bedraagt %0"; // translategemma:4b
+"App color" = "Kleur van de app"; // translategemma:4b
+"Wired color" = "Gestructureerde kleur"; // translategemma:4b
+"Compressed color" = "Gecodeerde kleur"; // translategemma:4b
+"Free color" = "Gratis kleur"; // translategemma:4b
+"Free memory (less than)" = "Vrij geheugen (minder dan)"; // translategemma:4b
+"Swap size" = "Grootte van het uitwisselingsgebied"; // translategemma:4b
+"Free RAM is" = "Gratis RAM is %0"; // translategemma:4b
+
+// Disk
+"Show removable disks" = "Toon verwijderbare schijven";
+"Used disk memory" = "%0 van %1 gebruikt";
+"Free disk memory" = "%0 van %1 vrij";
+"Disk to show" = "Schijf om te laten zien";
+"Open disk" = "Open schijf";
+"Switch view" = "Wissel weergave";
+"Disk utilization threshold" = "Drempelwaarde voor het gebruik van schijfruimte"; // translategemma:4b
+"Disk utilization is" = "Het gebruik van de schijf is %0"; // translategemma:4b
+"Read color" = "Lees de kleur"; // translategemma:4b
+"Write color" = "Schrijf kleur"; // translategemma:4b
+"Disk usage" = "Gebruikte schijfruimte"; // translategemma:4b
+"Total read" = "Totaal gelezen"; // translategemma:4b
+"Total written" = "Totale hoeveelheid geschreven"; // translategemma:4b
+"Write speed" = "Schrijf"; // translategemma:4b
+"Read speed" = "Lees"; // translategemma:4b
+"Drives" = "Schijven"; // translategemma:4b
+"SMART data" = "SMART-gegevens"; // translategemma:4b
+
+// Sensors
+"Temperature unit" = "Temperatuureenheid";
+"Celsius" = "Celsius";
+"Fahrenheit" = "Fahrenheit";
+"Save the fan speed" = "Ventilatorsnelheid opslaan";
+"Fan" = "Ventilator";
+"HID sensors" = "Sensoren voor het meten van de hoogte"; // translategemma:4b
+"Synchronize fan's control" = "Synchroniseer de bediening van de ventilatoren"; // translategemma:4b
+"Current" = "Huidige"; // translategemma:4b
+"Energy" = "Energie"; // translategemma:4b
+"Show unknown sensors" = "Toon onbekende sensoren"; // translategemma:4b
+"Install fan helper" = "Installeer de ventilator-assistent"; // translategemma:4b
+"Uninstall fan helper" = "Verwijder de fan helper."; // translategemma:4b
+"Fan value" = "Waarde van de ventilator"; // translategemma:4b
+"Turn off fan" = "Zet de ventilator uit"; // translategemma:4b
+"You are going to turn off the fan. This is not recommended action that can damage your mac, are you sure you want to do that?" = "U gaat de ventilator uitschakelen. Dit is een onaanbevolen actie die uw Mac kan beschadigen. Bent u er zeker van dat u dit wilt doen?"; // translategemma:4b
+"Sensor threshold" = "Grenswaarde sensor"; // translategemma:4b
+"Left fan" = "Links"; // translategemma:4b
+"Right fan" = "Correct"; // translategemma:4b
+"Fastest fan" = "Snelst"; // translategemma:4b
+"Sensor to show" = "Sensor om weer te laten zien"; // translategemma:4b
+
+// Network
+"Uploading" = "Uploaden";
+"Downloading" = "Downloaden";
+"Public IP" = "Openbaar IP-adres";
+"Local IP" = "Lokaal IP-adres";
+"Interface" = "Interface";
+"Physical address" = "Fysiek adres";
+"Refresh" = "Ververs";
+"Click to copy public IP address" = "Klik om openbaar IP-adres te kopiëren";
+"Click to copy local IP address" = "Klik om lokaal IP-adres te kopiëren";
+"Click to copy wifi name" = "Klik om wifi-naam te kopiëren";
+"Click to copy mac address" = "Klik om mac-adres te kopiëren";
+"No connection" = "Geen verbinding";
+"Network interface" = "Netwerk interface";
+"Total download" = "Totaal download";
+"Total upload" = "Totaal upload";
+"Reader type" = "Lezer type";
+"Interface based" = "Interface-gebaseerd";
+"Processes based" = "Proces-gebaseerd";
+"Reset data usage" = "Reset dataverbruik"; // translategemma:4b
+"VPN mode" = "Modus VPN"; // translategemma:4b
+"Standard" = "Standaard"; // translategemma:4b
+"Security" = "Beveiliging"; // translategemma:4b
+"Channel" = "Kanaal"; // translategemma:4b
+"Common scale" = "Veelgebruikte schaal"; // translategemma:4b
+"Autodetection" = "Automatische detectie"; // translategemma:4b
+"Widget activation threshold" = "Drempelwaarde voor het activeren van een widget"; // translategemma:4b
+"Internet connection" = "Internetverbinding"; // translategemma:4b
+"Active state color" = "Kleur in de actieve toestand"; // translategemma:4b
+"Nonactive state color" = "Kleur voor de niet-actieve toestand"; // translategemma:4b
+"Connectivity host (ICMP)" = "Host voor verbinding (ICMP)"; // translategemma:4b
+"Leave empty to disable the check" = "Laat dit vel leeg, om de controle uit te schakelen."; // translategemma:4b
+"Connectivity history" = "Historie van verbindingen"; // translategemma:4b
+"Auto-refresh public IP address" = "Automatisch IP-adres van het publieke netwerk herstellen"; // translategemma:4b
+"Every hour" = "Elke uur"; // translategemma:4b
+"Every 12 hours" = "Elke 12 uur"; // translategemma:4b
+"Every 24 hours" = "Elke 24 uur"; // translategemma:4b
+"Network activity" = "Netwerkactiviteit"; // translategemma:4b
+"Last reset" = "Laatste reset %0 geleden"; // translategemma:4b
+"Latency" = "Vertraging"; // translategemma:4b
+"Upload speed" = "Uploaden"; // translategemma:4b
+"Download speed" = "Download";
+"Address" = "Adres"; // translategemma:4b
+"WiFi network" = "WiFi-netwerk"; // translategemma:4b
+"Local IP changed" = "Het lokale IP-adres is veranderd"; // translategemma:4b
+"Public IP changed" = "Het openbare IP-adres is gewijzigd."; // translategemma:4b
+"Previous IP" = "Vorige IP-adres: %0"; // translategemma:4b
+"New IP" = "Nieuw IP-adres: %0"; // translategemma:4b
+"Internet connection lost" = "Verbinding met het internet is verloren gegaan"; // translategemma:4b
+"Internet connection established" = "Internetverbinding is opgezet"; // translategemma:4b
+
+// Battery
+"Level" = "Niveau";
+"Source" = "Bron";
+"AC Power" = "Wisselstroom";
+"Battery Power" = "Batterijvermogen";
+"Time" = "Tijd";
+"Health" = "Gezondheid";
+"Amperage" = "Stroomsterkte"; // translategemma:4b
+"Voltage" = "Spanning"; // translategemma:4b
+"Cycles" = "Cycli";
+"Temperature" = "Temperatuur";
+"Power adapter" = "Oplader";
+"Power" = "Vermogen";
+"Is charging" = "Aan het opladen";
+"Time to discharge" = "Tijd tot ontladen";
+"Time to charge" = "Tijd tot opgeladen";
+"Calculating" = "Berekenen";
+"Fully charged" = "Volledig opgeladen";
+"Not connected" = "Niet verbonden";
+"Low level notification" = "Melding laag niveau";
+"High level notification" = "Melding hoog niveau";
+"Low battery" = "Bijna lege batterij";
+"High battery" = "Volle batterij";
+"Battery remaining" = "%0% over";
+"Battery remaining to full charge" = "%0% tot volledig opgeladen";
+"Percentage" = "Percentage";
+"Percentage and time" = "Percentage en tijd";
+"Time and percentage" = "Tijd and Percentage";
+"Time format" = "Tijdsnotatie";
+"Hide additional information when full" = "Verberg aanvullende informatie wanneer batterij vol is";
+"Last charge" = "Laatste oplading";
+"Capacity" = "Capaciteit"; // translategemma:4b
+"current / maximum / designed" = "huidig / maximum / ontworpen"; // translategemma:4b
+"Low power mode" = "Standaardmodus met laag stroomverbruik"; // translategemma:4b
+"Percentage inside the icon" = "Percentage binnen het icoon"; // translategemma:4b
+"Colorize battery" = "Kleuren de batterij"; // translategemma:4b
+"Charging current" = "Laadstroom"; // translategemma:4b
+"Charging Voltage" = "Laadspanning"; // translategemma:4b
+"Charger state inside the battery" = "Status van de oplaadunit binnenin de batterij"; // translategemma:4b
+
+// Bluetooth
+"Battery to show" = "Laadstatus weergeven"; // translategemma:4b
+"No Bluetooth devices are available" = "Er zijn geen Bluetooth-apparaten beschikbaar."; // translategemma:4b
+
+// Clock
+"Time zone" = "Tijdszone"; // translategemma:4b
+"Local" = "Lokaal"; // translategemma:4b
+"Calendar" = "Agenda"; // translategemma:4b
+"Show week numbers" = "Toon de weeknummers"; // translategemma:4b
+"Local time" = "Lokaan tijd"; // translategemma:4b
+"Add new clock" = "Voeg een nieuwe klok toe"; // translategemma:4b
+"Delete selected clock" = "Verwijder de geselecteerde klok"; // translategemma:4b
+"Help with datetime format" = "Hulp bij het formatteren van datums en tijden"; // translategemma:4b
+
+// Colors
+"Based on utilization" = "Gebaseerd op gebruik";
+"Based on pressure" = "Gebaseerd op druk";
+"Based on cluster" = "Op basis van een cluster"; // translategemma:4b
+"System accent" = "Systeemaccent"; // translategemma:4b
+"Monochrome accent" = "Monochroom accent"; // translategemma:4b
+"Clear" = "Helder";
+"White" = "Wit";
+"Black" = "Zwart";
+"Gray" = "Grijs";
+"Second gray" = "Tweede grijs";
+"Dark gray" = "Donkergrijs";
+"Light gray" = "Lichtgrijs";
+"Red" = "Rood";
+"Second red" = "Tweede rood";
+"Green" = "Groen";
+"Second green" = "Tweede groen";
+"Blue" = "Blauw";
+"Second blue" = "Tweede blauw";
+"Yellow" = "Geel";
+"Second yellow" = "Tweede geel";
+"Orange" = "Oranje";
+"Second orange" = "Tweede oranje";
+"Purple" = "Paars";
+"Second purple" = "Tweede paars";
+"Brown" = "Bruin";
+"Second brown" = "Tweede bruin";
+"Cyan" = "Lichtblauw2";
+"Magenta" = "Paars";
+"Pink" = "Roze";
+"Teal" = "Teal";
+"Indigo" = "Indigo";

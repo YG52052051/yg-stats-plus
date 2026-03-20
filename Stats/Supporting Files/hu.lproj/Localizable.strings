@@ -1,0 +1,511 @@
+//
+//  Localizable.strings
+//  Stats
+//
+//  Created by @moriczr on 22/01/2021, updated by András Oravecz (info@oandras.hu) on 06/01/2023
+//  Using Swift 5.0.
+//  Running on macOS 10.15.
+//
+//  Copyright © 2020 Serhiy Mytrovtsiy. All rights reserved.
+//
+
+// Modules
+"CPU" = "CPU";
+"Open CPU settings" = "CPU beállítások megnyitása";
+"GPU" = "Grafikus processzor"; // translategemma:4b
+"Open GPU settings" = "GPU beállítások megnyitása";
+"RAM" = "Memória";
+"Open RAM settings" = "Memória beállítások megnyitása";
+"Disk" = "Lemezek";
+"Open Disk settings" = "Lemez beállítások megnyitása";
+"Sensors" = "Érzékelők";
+"Open Sensors settings" = "Érzékelő beállítások megnyitása";
+"Network" = "Hálózat";
+"Open Network settings" = "Hálózati beállítások megnyitása";
+"Battery" = "Akkumulátor";
+"Open Battery settings" = "Akkumulátor beállítások megnyitása";
+"Bluetooth" = "Bluetooth";
+"Open Bluetooth settings" = "Bluetooth beállítások megnyitása";
+"Clock" = "Óra";
+"Open Clock settings" = "Óra beállításainak megnyitása";
+
+// Words
+"Unknown" = "Ismeretlen";
+"Version" = "Verzió";
+"Processor" = "Processzor";
+"Memory" = "Memória";
+"Graphics" = "Grafika";
+"Close" = "Bezár";
+"Download" = "Letöltés";
+"Install" = "Telepítés";
+"Cancel" = "Mégsem";
+"Unavailable" = "Nem elérhető";
+"Yes" = "Igen";
+"No" = "Nem";
+"Automatic" = "Automatikus";
+"Manual" = "Kézi";
+"None" = "Egyik sem";
+"Dots" = "Pontok";
+"Arrows" = "Nyilak";
+"Characters" = "Karakterek";
+"Short" = "Rövid";
+"Long" = "Hosszú";
+"Statistics" = "Statisztikák";
+"Max" = "Max";
+"Min" = "Minimum"; // translategemma:4b
+"Reset" = "Visszaállít";
+"Alignment" = "Igazítás";
+"Left alignment" = "Balra igazítás";
+"Center alignment" = "Középre igazítás";
+"Right alignment" = "Jobbra igazítás";
+"Dashboard" = "Irányítópult";
+"Enabled" = "Bekapcsolva";
+"Disabled" = "Kikapcsolva";
+"Silent" = "Néma";
+"Units" = "Mértékegységek";
+"Fans" = "Ventilátorok";
+"Scaling" = "Méretezés";
+"Linear" = "Lineáris";
+"Square" = "Négyzet";
+"Cube" = "Kocka";
+"Logarithmic" = "Logaritmikus";
+"Fixed scale" = "Javítva"; // translategemma:4b
+"Cores" = "Magok";
+"Settings" = "Beállítások";
+"Name" = "Név";
+"Format" = "Formátum";
+"Turn off" = "Kikapcsolás";
+"Normal" = "Normális"; // translategemma:4b
+"Warning" = "Figyelmeztetés";
+"Critical" = "Kritikus";
+"Usage" = "Használat";
+"2 minutes" = "2 perc"; // translategemma:4b
+"3 minutes" = "3 perc"; // translategemma:4b
+"10 minutes" = "10 perc"; // translategemma:4b
+"Import" = "Import";
+"Export" = "Kivonás"; // translategemma:4b
+"Separator" = "Elválasztó"; // translategemma:4b
+"Read" = "Olvassa el"; // translategemma:4b
+"Write" = "Ír"; // translategemma:4b
+"Frequency" = "Hajlamosaság"; // translategemma:4b
+"Save" = "Mentés"; // translategemma:4b
+"Run" = "Futtass"; // translategemma:4b
+"Stop" = "Megállj"; // translategemma:4b
+"Uninstall" = "Feltörlés"; // translategemma:4b
+"1 sec" = "1 másodperc"; // translategemma:4b
+"2 sec" = "2 másodperc"; // translategemma:4b
+"3 sec" = "3 másodperc"; // translategemma:4b
+"5 sec" = "5 másodperc"; // translategemma:4b
+"10 sec" = "10 másodperc"; // translategemma:4b
+"15 sec" = "15 másodperc"; // translategemma:4b
+"30 sec" = "30 másodperc"; // translategemma:4b
+"60 sec" = "60 másodperc"; // translategemma:4b
+
+// Setup
+"Stats Setup" = "A Stats beállítása";
+"Previous" = "Előző";
+"Previous page" = "Előző oldal";
+"Next" = "Következő";
+"Next page" = "Következő oldal";
+"Finish" = "Befejezés";
+"Finish setup" = "Beállítás befejezése";
+"Welcome to Stats" = "Üdvözlünk a Stats programban";
+"welcome_message" = "Köszönjük, hogy a Stats programot használod, ami egy ingyenes, nyílt forráskódú, macOS rendszer monitorozó alkalmazás a menüsorodba.";
+"Start the application automatically when starting your Mac" = "Az alkalmazás indítása a rendszer indulásakor";
+"Do not start the application automatically when starting your Mac" = "Ne indítsa az alkalmazást a rendszer indulásakor";
+"Do everything silently in the background (recommended)" = "Végezzen mindent csendben a háttérben (ajánlott)";
+"Check for a new version on startup" = "Új verzió keresése indításkor";
+"Check for a new version every day (once a day)" = "Új verzió keresése minden nap (napi egyszer)";
+"Check for a new version every week (once a week)" = "Új verzió keresése minden héten (heti egyszer)";
+"Check for a new version every month (once a month)" = "Új verzió keresése minden hónapban (havi egyszer)";
+"Never check for updates (not recommended)" = "Ne keressen frissítéseket (nem ajánlott)";
+"Anonymous telemetry for better development decisions" = "Névtelen telemetria a jobb fejlesztői döntések érdekében";
+"Share anonymous telemetry data" = "Névtelen telemetriai adatok megosztása";
+"Do not share anonymous telemetry data" = "Ne osszon meg névtelen telemetriai adatokat";
+"The configuration is completed" = "A konfiguráció befejezve";
+"finish_setup_message" = "Minden beállítva!\nA Stats egy nyílt forráskódú eszköz, ami ingyenes és az is marad.\nHa hasznosnak találod, támogathatod a fejlesztését, mindig nagyra értékeljük!";
+
+// Alerts
+"New version available" = "Új verzió érhető el";
+"Click to install the new version of Stats" = "Kattintson a Stats új verziójának telepítéséhez";
+"Successfully updated" = "Sikeres frissítés";
+"Stats was updated to v" = "A Stats sikeresen frissítve lett a(z) v%0 verzióra";
+"Reset settings text" = "Minden alkalmazás beállítás alaphelyzetbe fog állni, és az alkalmazás újra fog indulni. Biztosan ezt szeretnéd?";
+"Support text" = "Köszönjük, hogy használja a Stats-t!\n\n A nyílt forráskódú projekt fenntartása és fejlesztése időt és erőforrásokat igényel. Az Ön támogatása segít nekünk abban, hogy továbbra is ingyenes és megbízható alkalmazást nyújtsunk mindenkinek.\n\nHa hasznosnak találja a Stats-t, kérjük, fontolja meg, hogy hozzájáruljon. Minden kis aprócska összeg segít!";
+
+// Settings
+"Open Activity Monitor" = "Tevékenységfigyelő megnyitása";
+"Report a bug" = "Probléma jelentése";
+"Support the application" = "Támogasd az alkalmazás fejlesztését";
+"Close application" = "Alkalmazás bezárása";
+"Open application settings" = "Beállítások megnyitása";
+"Open dashboard" = "Irányítópult megnyitása";
+"No notifications available in this module" = "Nincsenek elérhető értesítések ebben a modulban";
+"Open Calendar" = "Nyisd meg a naptárat"; // translategemma:4b
+"Toggle the module" = "Engedje be/ki a modult"; // translategemma:4b
+
+// Application settings
+"Update application" = "Alkalmazás frissítése";
+"Check for updates" = "Frissítések keresése";
+"At start" = "Induláskor";
+"Once per day" = "Naponta";
+"Once per week" = "Hetente";
+"Once per month" = "Havonta";
+"Never" = "Soha";
+"Check for update" = "Frissítés keresése";
+"Show icon in dock" = "Ikon megjelenítése a Dockban";
+"Start at login" = "Alkalmazás indítása bejelentkezéskor";
+"Build number" = "Verziószám";
+"Import settings" = "Import beállítások"; // translategemma:4b
+"Export settings" = "Export beállítások"; // translategemma:4b
+"Reset settings" = "Beállítások alaphelyzetbe állítása";
+"Pause the Stats" = "Stats felfüggesztése";
+"Resume the Stats" = "Stats folytatása";
+"Combined modules" = "Egyesített modulok";
+"Combined details" = "Összesített adatok"; // translategemma:4b
+"Spacing" = "Helyköz";
+"Share anonymous telemetry" = "Telemetria megosztása névtelenül";
+"Choose file" = "Válasszon fájlt"; // translategemma:4b
+"Stress tests" = "Feszültségtesztek"; // translategemma:4b
+
+// Dashboard
+"Serial number" = "Sorozatszám";
+"Model identifier" = "Modell azonosító"; // translategemma:4b
+"Production year" = "Gyártás éve"; // translategemma:4b
+"Uptime" = "Indítás óta eltel idő";
+"Number of cores" = "%0 mag";
+"Number of threads" = "%0 szál";
+"Number of e-cores" = "%0 energiatakarékos mag";
+"Number of p-cores" = "%0 teljesítményre optimalizált mag";
+"Disks" = "Merevlemezek"; // translategemma:4b
+"Display" = "Megjelenítés"; // translategemma:4b
+
+// Update
+"The latest version of Stats installed" = "A Stats legújabb verziója van telepítve";
+"Downloading..." = "Letöltés...";
+"Current version: " = "Jelenlegi verzió:  ";
+"Latest version: " = "Legújabb verzió:    ";
+
+// Widgets
+"Color" = "Szín";
+"Label" = "Címke megjelenítése";
+"Box" = "Háttér";
+"Frame" = "Keret";
+"Value" = "Érték megjelenítése";
+"Colorize" = "Színezés";
+"Colorize value" = "Érték színezése";
+"Additional information" = "További információk megjelenítése";
+"Reverse values order" = "Értékek sorrendjének megfordítása";
+"Base" = "Mértékegység";
+"Display mode" = "Megjelenítés mód";
+"One row" = "Egy sor";
+"Two rows" = "Két sor";
+"Mini widget" = "Mini";
+"Line chart widget" = "Vonaldiagram";
+"Bar chart widget" = "Oszlopdiagram";
+"Pie chart widget" = "Kördiagram";
+"Network chart widget" = "Hálózati diagram";
+"Speed widget" = "Sebesség";
+"Battery widget" = "Akkumulátor";
+"Stack widget" = "Szerkezet"; // translategemma:4b
+"Memory widget" = "Memória";
+"Static width" = "Fix szélesség";
+"Tachometer widget" = "Fordulatszámmérő";
+"State widget" = "Állapot";
+"Text widget" = "Tekstbox"; // translategemma:4b
+"Battery details widget" = "A akkumulátor részletei widget"; // translategemma:4b
+"Show symbols" = "Szimbólumok mutatása";
+"Label widget" = "Címke";
+"Number of reads in the chart" = "Értékek száma a grafikonon";
+"Color of download" = "Letöltés színe";
+"Color of upload" = "Feltöltés színe";
+"Monospaced font" = "Mono betűtípus";
+"Reverse order" = "Fordított sorrend";
+"Chart history" = "Grafikonok története"; // translategemma:4b
+"Default color" = "Alapérték"; // translategemma:4b
+"Transparent when no activity" = "Árnyalatless, ha nincs tevékenység"; // translategemma:4b
+"Constant color" = "Konstans"; // translategemma:4b
+
+// Module Kit
+"Open module settings" = "Modul beállításainak megnyitása";
+"Select widget" = "%0 modul kiválasztása";
+"Open widget settings" = "Modul beállításainak megnyitása";
+"Update interval" = "Frissítési időköz";
+"Usage history" = "Használati előzmények";
+"Details" = "Részletek";
+"Top processes" = "Top folyamatok";
+"Pictogram" = "Piktogram";
+"Module" = "Modul";
+"Widgets" = "Widgetek";
+"Popup" = "Felugrik";
+"Notifications" = "Értesítések";
+"Merge widgets" = "Widgetek egyesítése";
+"No available widgets to configure" = "Nincs elérhető widget a beállításhoz";
+"No options to configure for the popup in this module" = "A modul lenyíló ablakához nem tartozik beállítás";
+"Process" = "Folyamat"; // translategemma:4b
+"Kill process" = "Átírd a folyamatot"; // translategemma:4b
+"Keyboard shortcut" = "Billentyűparancs"; // translategemma:4b
+"Listening..." = "Hallgat..."; // translategemma:4b
+
+// Modules
+"Number of top processes" = "Top folyamatok száma";
+"Update interval for top processes" = "Top folyamatok frissítési időköze";
+"Notification level" = "Értesítési szint";
+"Chart color" = "Diagram színe";
+"Main chart scaling" = "Fődiagram méretezése"; // translategemma:4b
+"Scale value" = "Skálázási érték"; // translategemma:4b
+"Text widget value" = "A szöveges widget értéke"; // translategemma:4b
+
+// CPU
+"CPU usage" = "CPU használat";
+"CPU temperature" = "CPU hőmérséklet";
+"CPU frequency" = "CPU frekvencia";
+"System" = "Rendszer";
+"User" = "Felhasználó";
+"Idle" = "Tétlenség";
+"Show usage per core" = "Terhelés megjelenítése magonként";
+"Show hyper-threading cores" = "Hyper-threading magok mutatása";
+"Split the value (System/User)" = "Ossza fel az értéket (Rendszer/Felhasználó)";
+"Scheduler limit" = "Ütemező korlát";
+"Speed limit" = "Sebesség korlát";
+"Average load" = "Átlagos terheltség";
+"1 minute" = "1 perc";
+"5 minutes" = "5 perc";
+"15 minutes" = "15 perc";
+"CPU usage threshold" = "CPU használati küszöb";
+"CPU usage is" = "%0 a CPU használat";
+"Efficiency cores" = "Energiatakarékos magok";
+"Performance cores" = "Teljesítményre optimalizált magok";
+"System color" = "Rendszer színe";
+"User color" = "Felhasználó színe";
+"Idle color" = "Tétlenség színe";
+"Cluster grouping" = "Csoportosítás";
+"Efficiency cores color" = "Energiatakarékos magok színe";
+"Performance cores color" = "Teljesítmény magok színe";
+"Total load" = "Teljes terheltség";
+"System load" = "Rendszer terheltség";
+"User load" = "Felhasználó terheltség";
+"Efficiency cores load" = "Energiatakarékos magok terheltsége";
+"Performance cores load" = "Teljesítmény magok terheltsége";
+"All cores" = "Minden mag"; // translategemma:4b
+
+// GPU
+"GPU to show" = "Megjelenítendő GPU";
+"Show GPU type" = "GPU típus mutatása";
+"GPU enabled" = "GPU bekapcsolva";
+"GPU disabled" = "GPU kikapcsolva";
+"GPU temperature" = "GPU hőmérséklet";
+"GPU utilization" = "GPU terhelés";
+"Vendor" = "Gyártó";
+"Model" = "Modell";
+"Status" = "Állapot";
+"Active" = "Aktív";
+"Non active" = "Inaktív";
+"Fan speed" = "Ventilátor sebesség";
+"Core clock" = "Mag órajel";
+"Memory clock" = "Memória órajel";
+"Utilization" = "Felhasználás";
+"Render utilization" = "Render használat";
+"Tiler utilization" = "Tiler használat";
+"GPU usage threshold" = "GPU használati küszöb";
+"GPU usage is" = "%0 a GPU használat";
+
+// RAM
+"Memory usage" = "Memóriahasználat";
+"Memory pressure" = "Memóriaterhelés";
+"Total" = "Teljes";
+"Used" = "Felhasznált";
+"App" = "Alkalmazás";
+"Wired" = "Nem lapozható";
+"Compressed" = "Tömörített";
+"Free" = "Szabad";
+"Swap" = "Csereterület";
+"Split the value (App/Wired/Compressed)" = "Ossza fel az értéket (Alkalmazás/Nem lapozható/Tömörített)";
+"RAM utilization threshold" = "RAM használati küszöb";
+"RAM utilization is" = "%0 a RAM használat";
+"App color" = "Alkalmazás színe";
+"Wired color" = "Nem lapozható színe";
+"Compressed color" = "Tömörített színe";
+"Free color" = "Szabad színe";
+"Free memory (less than)" = "Szabad memória (kevesebb mint)";
+"Swap size" = "Swap mérete";
+"Free RAM is" = "%0 a szabad RAM";
+
+// Disk
+"Show removable disks" = "Eltávolítható adattárolók megjelenítése";
+"Used disk memory" = "%0 felhasznált %1-ból";
+"Free disk memory" = "%0 szabad %1-ból";
+"Disk to show" = "Megjelenítendő lemez";
+"Open disk" = "Merevlemez megnyitása";
+"Switch view" = "Nézet felcserélése";
+"Disk utilization threshold" = "Lemez használati küszöb";
+"Disk utilization is" = "%0 a lemez használat";
+"Read color" = "Olvasás színe";
+"Write color" = "Írás színe";
+"Disk usage" = "Lemez használat";
+"Total read" = "Teljes olvasott"; // translategemma:4b
+"Total written" = "Teljes írásos"; // translategemma:4b
+"Write speed" = "Ír"; // translategemma:4b
+"Read speed" = "Olvassa el"; // translategemma:4b
+"Drives" = "Üzemek"; // translategemma:4b
+"SMART data" = "SMART adatok"; // translategemma:4b
+
+// Sensors
+"Temperature unit" = "Hőmérséklet mértékegysége";
+"Celsius" = "Celsius";
+"Fahrenheit" = "Fahrenheit";
+"Save the fan speed" = "Ventilátor sebesség mentése";
+"Fan" = "Ventilátor";
+"HID sensors" = "HID szenzorok";
+"Synchronize fan's control" = "Ventilátor vezérlés szinkronizálása";
+"Current" = "Áramerősség";
+"Energy" = "Energia";
+"Show unknown sensors" = "Ismeretlen szenzorok megjelenítése";
+"Install fan helper" = "Ventilátor segítő telepítése";
+"Uninstall fan helper" = "Ventilátor segítő törlése";
+"Fan value" = "Ventilátor érték";
+"Turn off fan" = "Ventilátor kikapcsolása";
+"You are going to turn off the fan. This is not recommended action that can damage your mac, are you sure you want to do that?" = "A ventilátor ki lesz kapcsolva. Ez a művelet károsíthatja a macjét, ezért nem ajánlott. Biztosan ki akarja kapcsolni a ventilátort?";
+"Sensor threshold" = "Szenzor küszöb";
+"Left fan" = "Bal ventilátor";
+"Right fan" = "Jobb ventilátor";
+"Fastest fan" = "Leggyorsabb ventilátor";
+"Sensor to show" = "Érzékelő, amely..."; // translategemma:4b
+
+// Network
+"Uploading" = "Feltöltés";
+"Downloading" = "Letöltés";
+"Public IP" = "Publikus IP";
+"Local IP" = "Helyi IP";
+"Interface" = "Interfész";
+"Physical address" = "Fizikai cím";
+"Refresh" = "Frissítés";
+"Click to copy public IP address" = "Kattints a publikus IP cím másolásához";
+"Click to copy local IP address" = "Kattints a helyi IP cím másolásához";
+"Click to copy wifi name" = "Kattints a Wi-Fi nevének másolásához";
+"Click to copy mac address" = "Kattints a fizikai cím másolásához";
+"No connection" = "Nincs kapcsolat";
+"Network interface" = "Hálózati interfész kiválasztása";
+"Total download" = "Fogadott adatok";
+"Total upload" = "Küldött adatok";
+"Reader type" = "Olvasó típusa";
+"Interface based" = "Interfész alapú";
+"Processes based" = "Folyamat alapú";
+"Reset data usage" = "Adathasználati adatok alaphelyzetbe állítása";
+"VPN mode" = "VPN mód";
+"Standard" = "Szabvány";
+"Security" = "Biztonság";
+"Channel" = "Csatorna";
+"Common scale" = "Azonos méretezés";
+"Autodetection" = "Automatikus észlelés";
+"Widget activation threshold" = "Widget aktivációs küszöbe";
+"Internet connection" = "Internet kapcsolat";
+"Active state color" = "Aktív állapot színe";
+"Nonactive state color" = "Inaktív állapot színe";
+"Connectivity host (ICMP)" = "Kapcsolati gazdagép (ICMP)";
+"Leave empty to disable the check" = "Hagyd üresen az ellenőrzés kikapcsolásához";
+"Connectivity history" = "Kapcsolati előzmények";
+"Auto-refresh public IP address" = "Publikus IP cím automatikus frissítése";
+"Every hour" = "Óránként";
+"Every 12 hours" = "12 óránként";
+"Every 24 hours" = "24 óránként";
+"Network activity" = "Hálózati tevékenység";
+"Last reset" = "Utolsó visszaállítás óta eltelt idő: %0";
+"Latency" = "Válaszkazán"; // translategemma:4b
+"Upload speed" = "Feltöltés"; // translategemma:4b
+"Download speed" = "Letöltés"; // translategemma:4b
+"Address" = "Cím"; // translategemma:4b
+"WiFi network" = "WiFi hálózat"; // translategemma:4b
+"Local IP changed" = "A helyi IP-cím megváltozott"; // translategemma:4b
+"Public IP changed" = "A nyilvános IP-címet megváltoztatták"; // translategemma:4b
+"Previous IP" = "Korábbi IP cím: %0"; // translategemma:4b
+"New IP" = "Új IP cím: %0"; // translategemma:4b
+"Internet connection lost" = "Az internetkapcsolat megszűnt"; // translategemma:4b
+"Internet connection established" = "Az internetkapcsolat létrejött"; // translategemma:4b
+
+// Battery
+"Level" = "Töltöttségi szint";
+"Source" = "Forrás";
+"AC Power" = "Hálózati tápellátás";
+"Battery Power" = "Akkumulátor tápellátás";
+"Time" = "Időtartam";
+"Health" = "Állapot";
+"Amperage" = "Áramerősség";
+"Voltage" = "Feszültség";
+"Cycles" = "Ciklusok";
+"Temperature" = "Hőmérséklet";
+"Power adapter" = "Tápellátás";
+"Power" = "Teljesítmény";
+"Is charging" = "Jelenleg tölt";
+"Time to discharge" = "Idő a lemerülésig";
+"Time to charge" = "Idő a feltöltésig";
+"Calculating" = "Kiszámítás";
+"Fully charged" = "Teljesen feltöltve";
+"Not connected" = "Nincs csatlakoztatva";
+"Low level notification" = "Alacsony töltöttség értesítés";
+"High level notification" = "Magas töltöttség értesítés";
+"Low battery" = "Alacsony akkumulátor töltöttség";
+"High battery" = "Magas akkumulátor töltöttség";
+"Battery remaining" = "%0% töltöttség";
+"Battery remaining to full charge" = "%0% hátra a teljes töltöttséghez";
+"Percentage" = "Százalék";
+"Percentage and time" = "Százalék és időtartam";
+"Time and percentage" = "Időtartam és százalék";
+"Time format" = "Időformátum";
+"Hide additional information when full" = "További információk elrejtése, ha teljesen fel van töltve";
+"Last charge" = "Utolsó töltés";
+"Capacity" = "Kapacitás";
+"current / maximum / designed" = "jelenlegi / maximum / gyári";
+"Low power mode" = "Energia takarékos mód";
+"Percentage inside the icon" = "Százalék megjelenítése az ikonban";
+"Colorize battery" = "Akkumlátor színezése";
+"Charging current" = "Töltési áram"; // translategemma:4b
+"Charging Voltage" = "Töltési feszültség"; // translategemma:4b
+"Charger state inside the battery" = "A töltő állapot a akkumulátorban"; // translategemma:4b
+
+// Bluetooth
+"Battery to show" = "Akkumulátor megjelenítése";
+"No Bluetooth devices are available" = "Nincs elérhető Bluetooth eszköz";
+
+// Clock
+"Time zone" = "Időzóna";
+"Local" = "Helyi";
+"Calendar" = "Naptár"; // translategemma:4b
+"Show week numbers" = "Mutassa meg a hetek számát"; // translategemma:4b
+"Local time" = "Helyi idő"; // translategemma:4b
+"Add new clock" = "Hozzon létre új órát"; // translategemma:4b
+"Delete selected clock" = "Telenóra törlése"; // translategemma:4b
+"Help with datetime format" = "Segítség a dátum és idő formázásában"; // translategemma:4b
+
+// Colors
+"Based on utilization" = "Használat függő";
+"Based on pressure" = "Terhelés függő";
+"Based on cluster" = "Csoport függő";
+"System accent" = "Rendszer kiemelő színe";
+"Monochrome accent" = "Monokróm kiemelő szín";
+"Clear" = "Átlátszó";
+"White" = "Fehér";
+"Black" = "Fekete";
+"Gray" = "Szürke";
+"Second gray" = "Második szürke";
+"Dark gray" = "Sötét szürke";
+"Light gray" = "Világos szürke";
+"Red" = "Piros";
+"Second red" = "Második piros";
+"Green" = "Zöld";
+"Second green" = "Második zöld";
+"Blue" = "Kék";
+"Second blue" = "Második kék";
+"Yellow" = "Citromsárga";
+"Second yellow" = "Második citromsárga";
+"Orange" = "Narancssárga";
+"Second orange" = "Második narancssárga";
+"Purple" = "Lila";
+"Second purple" = "Második lila";
+"Brown" = "Barna";
+"Second brown" = "Második barna";
+"Cyan" = "Cián";
+"Magenta" = "Magenta";
+"Pink" = "Rózsaszín";
+"Teal" = "Zöldeskék";
+"Indigo" = "Indigó";
