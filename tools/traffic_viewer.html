@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats - Process Traffic History Viewer</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 20px; color: #4cc9f0; }
+        .upload-area {
+            border: 2px dashed #4cc9f0;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .upload-area:hover { background: rgba(76, 201, 240, 0.1); }
+        .upload-area.dragover { background: rgba(76, 201, 240, 0.2); border-color: #fff; }
+        .upload-area input { display: none; }
+        .upload-area label { cursor: pointer; font-size: 18px; }
+        .upload-area p { margin-top: 10px; color: #888; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card h3 { color: #888; font-size: 14px; margin-bottom: 10px; }
+        .stat-card .value { font-size: 28px; font-weight: bold; }
+        .stat-card.download .value { color: #4cc9f0; }
+        .stat-card.upload .value { color: #f72585; }
+        .stat-card.total .value { color: #7209b7; }
+        .stat-card.processes .value { color: #4895ef; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #16213e;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td { padding: 12px 15px; text-align: left; }
+        th { background: #0f3460; color: #4cc9f0; }
+        tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+        tr:hover { background: rgba(76, 201, 240, 0.1); }
+        .text-right { text-align: right; }
+        .bar-container { width: 100px; display: inline-block; }
+        .bar {
+            height: 8px;
+            background: #4cc9f0;
+            border-radius: 4px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .bar.upload { background: #f72585; }
+        .hidden { display: none; }
+        .date-filter { margin-bottom: 20px; text-align: center; }
+        .date-filter select {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #16213e;
+            color: #fff;
+            border: 1px solid #4cc9f0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .help-text {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        .help-text code {
+            background: #16213e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #4cc9f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Stats - Process Traffic History</h1>
+
+        <div class="upload-area" id="uploadArea">
+            <label for="fileInput">
+                📁 拖拽 JSON 文件到此处 或 点击选择文件
+            </label>
+            <input type="file" id="fileInput" accept=".json">
+            <p>使用 Python 脚本导出数据: <code>python3 view_traffic_history.py --export traffic.json</code></p>
+        </div>
+
+        <div id="content" class="hidden">
+            <div class="stats-grid">
+                <div class="stat-card download">
+                    <h3>📥 总下载</h3>
+                    <div class="value" id="totalDownload">0 B</div>
+                </div>
+                <div class="stat-card upload">
+                    <h3>📤 总上传</h3>
+                    <div class="value" id="totalUpload">0 B</div>
+                </div>
+                <div class="stat-card total">
+                    <h3>📊 总流量</h3>
+                    <div class="value" id="totalTraffic">0 B</div>
+                </div>
+                <div class="stat-card processes">
+                    <h3>🔧 进程数</h3>
+                    <div class="value" id="processCount">0</div>
+                </div>
+            </div>
+
+            <div class="date-filter">
+                <select id="dateFilter">
+                    <option value="all">所有日期</option>
+                </select>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>进程名称</th>
+                        <th class="text-right">📥 下载</th>
+                        <th class="text-right">📤 上传</th>
+                        <th class="text-right">📊 总计</th>
+                        <th class="text-right">比例</th>
+                    </tr>
+                </thead>
+                <tbody id="processTable"></tbody>
+            </table>
+        </div>
+
+        <div id="helpText" class="help-text">
+            <h3>使用说明</h3>
+            <p>1. 运行 Stats 应用一段时间，让它收集数据</p>
+            <p>2. 使用 Python 脚本导出数据:</p>
+            <p style="margin: 10px 0;"><code>python3 view_traffic_history.py --export traffic.json</code></p>
+            <p>3. 将导出的 JSON 文件拖拽到本页面上</p>
+        </div>
+    </div>
+
+    <script>
+        let allData = null;
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    allData = JSON.parse(e.target.result);
+                    displayData(allData);
+                } catch (err) {
+                    alert('解析 JSON 文件失败: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function displayData(data) {
+            document.getElementById('uploadArea').classList.add('hidden');
+            document.getElementById('helpText').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+
+            const processTotals = data.process_totals || {};
+            const processes = Object.entries(processTotals).map(([name, info]) => ({
+                name,
+                download: info.download || 0,
+                upload: info.upload || 0
+            }));
+
+            // Calculate totals
+            const totalDownload = processes.reduce((sum, p) => sum + p.download, 0);
+            const totalUpload = processes.reduce((sum, p) => sum + p.upload, 0);
+            const totalTraffic = totalDownload + totalUpload;
+
+            document.getElementById('totalDownload').textContent = formatBytes(totalDownload);
+            document.getElementById('totalUpload').textContent = formatBytes(totalUpload);
+            document.getElementById('totalTraffic').textContent = formatBytes(totalTraffic);
+            document.getElementById('processCount').textContent = processes.length;
+
+            // Populate date filter
+            if (data.records) {
+                const dates = [...new Set(data.records.map(r => r.date))].sort().reverse();
+                const dateFilter = document.getElementById('dateFilter');
+                dateFilter.innerHTML = '<option value="all">所有日期</option>';
+                dates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    dateFilter.appendChild(option);
+                });
+            }
+
+            // Sort by total traffic and render table
+            processes.sort((a, b) => (b.download + b.upload) - (a.download + a.upload));
+            renderTable(processes, totalTraffic);
+        }
+
+        function renderTable(processes, totalTraffic) {
+            const tbody = document.getElementById('processTable');
+            tbody.innerHTML = '';
+
+            processes.forEach(p => {
+                const total = p.download + p.upload;
+                const percentage = totalTraffic > 0 ? (total / totalTraffic * 100).toFixed(1) : 0;
+                const barWidth = totalTraffic > 0 ? (total / totalTraffic * 100) : 0;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${p.name}</td>
+                    <td class="text-right">${formatBytes(p.download)}</td>
+                    <td class="text-right">${formatBytes(p.upload)}</td>
+                    <td class="text-right">${formatBytes(total)}</td>
+                    <td class="text-right">
+                        <div class="bar-container">
+                            <div class="bar" style="width: ${Math.min(barWidth, 100)}%"></div>
+                        </div>
+                        ${percentage}%
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Event listeners
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        document.getElementById('dateFilter').addEventListener('change', (e) => {
+            if (!allData) return;
+            const selectedDate = e.target.value;
+
+            if (selectedDate === 'all') {
+                displayData(allData);
+            } else {
+                const filteredRecords = allData.records.filter(r => r.date === selectedDate);
+                // Recalculate process totals for filtered date
+                const processTotals = {};
+                filteredRecords.forEach(record => {
+                    Object.entries(record.data || {}).forEach(([key, info]) => {
+                        const name = info.name || key;
+                        if (!processTotals[name]) {
+                            processTotals[name] = { download: 0, upload: 0 };
+                        }
+                        processTotals[name].download += info.download || 0;
+                        processTotals[name].upload += info.upload || 0;
+                    });
+                });
+                displayData({ ...allData, process_totals: processTotals, records: filteredRecords });
+            }
+        });
+    </script>
+</body>
+</html>
