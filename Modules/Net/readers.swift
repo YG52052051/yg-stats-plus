@@ -564,21 +564,21 @@ public class ProcessReader: Reader<[Network_Process]> {
     private let title: String = "Network"
     private var previous: [Network_Process] = []
 
-    // Traffic history storage
-    private var _currentHourBucket: ProcessTrafficBucket = [:]
-    private var _currentHourKey: String = ""
+    // Traffic history storage (10-minute slots)
+    private var _currentBucket: ProcessTrafficBucket = [:]
+    private var _currentTimeSlotKey: String = ""
     private let trafficQueue = DispatchQueue(label: "eu.exelban.ProcessTrafficQueue")
     private let trafficDBKey = "process_traffic"
     private var autoSaveTimer: Timer?
 
-    private var currentHourBucket: ProcessTrafficBucket {
-        get { self.trafficQueue.sync { self._currentHourBucket } }
-        set { self.trafficQueue.sync { self._currentHourBucket = newValue } }
+    private var currentBucket: ProcessTrafficBucket {
+        get { self.trafficQueue.sync { self._currentBucket } }
+        set { self.trafficQueue.sync { self._currentBucket = newValue } }
     }
 
-    private var currentHourKey: String {
-        get { self.trafficQueue.sync { self._currentHourKey } }
-        set { self.trafficQueue.sync { self._currentHourKey = newValue } }
+    private var currentTimeSlotKey: String {
+        get { self.trafficQueue.sync { self._currentTimeSlotKey } }
+        set { self.trafficQueue.sync { self._currentTimeSlotKey = newValue } }
     }
 
     private var numberOfProcesses: Int {
@@ -596,8 +596,8 @@ public class ProcessReader: Reader<[Network_Process]> {
     }
 
     private func autoSave() {
-        guard !self.currentHourKey.isEmpty && !self.currentHourBucket.isEmpty else { return }
-        self.saveBucket(self.currentHourKey, self.currentHourBucket)
+        guard !self.currentTimeSlotKey.isEmpty && !self.currentBucket.isEmpty else { return }
+        self.saveBucket(self.currentTimeSlotKey, self.currentBucket)
     }
     
     public override func read() {
@@ -729,35 +729,39 @@ public class ProcessReader: Reader<[Network_Process]> {
 
     private func recordTraffic(_ processes: [Network_Process]) {
         let now = Date()
-        let hourKey = self.getHourKey(now)
+        let timeSlotKey = self.getTimeSlotKey(now)
 
-        // 检测小时切换
-        if self.currentHourKey != hourKey {
-            if !self.currentHourKey.isEmpty {
-                self.saveBucket(self.currentHourKey, self.currentHourBucket)
+        // 检测10分钟时间槽切换
+        if self.currentTimeSlotKey != timeSlotKey {
+            if !self.currentTimeSlotKey.isEmpty {
+                self.saveBucket(self.currentTimeSlotKey, self.currentBucket)
             }
-            self.currentHourKey = hourKey
-            self.currentHourBucket = [:]
+            self.currentTimeSlotKey = timeSlotKey
+            self.currentBucket = [:]
         }
 
         // 累加流量
         for process in processes {
             let uniqueKey = "\(process.name)_\(process.pid)"
-            if self.currentHourBucket[uniqueKey] == nil {
-                self.currentHourBucket[uniqueKey] = ProcessTrafficRecord(
+            if self.currentBucket[uniqueKey] == nil {
+                self.currentBucket[uniqueKey] = ProcessTrafficRecord(
                     name: process.name,
                     pid: process.pid
                 )
             }
-            self.currentHourBucket[uniqueKey]?.download += Int64(process.download)
-            self.currentHourBucket[uniqueKey]?.upload += Int64(process.upload)
+            self.currentBucket[uniqueKey]?.download += Int64(process.download)
+            self.currentBucket[uniqueKey]?.upload += Int64(process.upload)
         }
     }
 
-    private func getHourKey(_ date: Date) -> String {
+    private func getTimeSlotKey(_ date: Date) -> String {
+        let calendar = Calendar.current
+        let minutes = calendar.component(.minute, from: date)
+        let slot = (minutes / 10) * 10  // 取整到10分钟
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd|HH"
-        return "\(self.trafficDBKey)|\(formatter.string(from: date))"
+        let hourStr = formatter.string(from: date)
+        return "\(self.trafficDBKey)|\(hourStr):\(String(format: "%02d", slot))"
     }
 
     private func saveBucket(_ key: String, _ bucket: ProcessTrafficBucket) {
@@ -783,15 +787,15 @@ public class ProcessReader: Reader<[Network_Process]> {
                 allData = existing
             }
 
-            // 添加/更新当前小时的数据
-            let parts = self.currentHourKey.split(separator: "|")
+            // 添加/更新当前时间槽的数据
+            let parts = self.currentTimeSlotKey.split(separator: "|")
             if parts.count >= 3 {
                 let date = String(parts[1])
-                let hour = String(parts[2])
+                let timeSlot = String(parts[2])
                 if allData[date] == nil {
                     allData[date] = [:]
                 }
-                allData[date]?[hour] = self.currentHourBucket
+                allData[date]?[timeSlot] = self.currentBucket
             }
 
             // 保存到文件
@@ -807,8 +811,8 @@ public class ProcessReader: Reader<[Network_Process]> {
     public override func terminate() {
         self.autoSaveTimer?.invalidate()
         self.autoSaveTimer = nil
-        if !self.currentHourKey.isEmpty && !self.currentHourBucket.isEmpty {
-            self.saveBucket(self.currentHourKey, self.currentHourBucket)
+        if !self.currentTimeSlotKey.isEmpty && !self.currentBucket.isEmpty {
+            self.saveBucket(self.currentTimeSlotKey, self.currentBucket)
         }
     }
 }

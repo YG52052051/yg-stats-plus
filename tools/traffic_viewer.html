@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stats - Process Traffic History</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -83,7 +84,9 @@
         tr:nth-child(even) { background: rgba(255,255,255,0.02); }
         tr:hover { background: rgba(76, 201, 240, 0.1); }
         .text-right { text-align: right; }
-        .process-name { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .process-name { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+        .process-name:hover { color: #4cc9f0; }
+        .process-name.selected { color: #4cc9f0; font-weight: bold; }
         .bar-container { width: 80px; display: inline-block; vertical-align: middle; }
         .bar {
             height: 8px;
@@ -94,39 +97,46 @@
         }
         .hidden { display: none; }
 
-        .hourly-section {
+        .chart-section {
             margin-top: 30px;
             background: #16213e;
             border-radius: 10px;
             padding: 20px;
         }
-        .hourly-section h2 { color: #4cc9f0; margin-bottom: 15px; }
-        .hourly-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
+        .chart-section h2 { color: #4cc9f0; margin-bottom: 15px; }
+        .chart-container {
+            position: relative;
+            height: 400px;
         }
-        .hour-card {
+        .process-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .process-pill {
+            padding: 5px 12px;
             background: #0f3460;
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
         }
-        .hour-card .hour { font-size: 18px; color: #4cc9f0; margin-bottom: 5px; }
-        .hour-card .traffic { font-size: 14px; color: #888; }
+        .process-pill:hover { background: #1a4a7a; }
+        .process-pill.active { background: #4cc9f0; color: #000; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📊 Stats - Process Traffic History</h1>
-        <p class="subtitle">查看每个应用的网络流量使用情况</p>
+        <p class="subtitle">查看每个应用的网络流量使用情况和趋势</p>
 
         <div class="upload-area" id="uploadArea">
             <label for="fileInput">
                 📁 拖拽 JSON 文件到此处 或 点击选择文件
             </label>
             <input type="file" id="fileInput" accept=".json">
-            <p>JSON 文件位置: <code>~/Documents/traffic_history.json</code></p>
+            <p>JSON 文件位置: <code>~/Library/Application Support/Stats/traffic_history.json</code></p>
             <p style="margin-top: 15px; font-size: 13px;">⚠️ 首次使用需要先运行 Stats.app 一段时间来收集数据</p>
         </div>
 
@@ -161,12 +171,6 @@
                         <option value="all">全部</option>
                     </select>
                 </div>
-                <div class="filter-group">
-                    <label>⏰ 时间:</label>
-                    <select id="hourFilter">
-                        <option value="all">全部</option>
-                    </select>
-                </div>
             </div>
 
             <table>
@@ -182,26 +186,30 @@
                 <tbody id="processTable"></tbody>
             </table>
 
-            <div class="hourly-section" id="hourlySection">
-                <h2>⏰ 每小时流量统计</h2>
-                <div class="hourly-grid" id="hourlyGrid"></div>
+            <div class="chart-section" id="chartSection">
+                <h2>📈 流量趋势 (点击表格中的进程名称查看)</h2>
+                <div class="process-pills" id="processPills"></div>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
             </div>
         </div>
 
         <div id="helpText" class="upload-area" style="cursor: default;">
             <h3 style="margin-bottom: 15px;">📖 使用说明</h3>
-            <p>1. 安装并运行 <strong>Stats.app</strong>，p>
-            <p>2. 使用一段时间（几分钟）让它收集数据</p>
-            <p>3. 关闭 Stats.app（会自动保存数据到 JSON）</p>
+            <p>1. 安装并运行 <strong>Stats.app</strong></p>
+            <p>2. 使用一段时间（至少10分钟）让它收集数据</p>
+            <p>3. 每5分钟自动保存，每10分钟生成新的数据点</p>
             <p style="margin: 15px 0;">4. 打开本页面，拖入文件:</p>
-            <p style="margin: 5px 0;"><code>~/Documents/traffic_history.json</code></p>
+            <p style="margin: 5px 0;"><code>~/Library/Application Support/Stats/traffic_history.json</code></p>
             <p style="margin-top: 15px; font-size: 13px; color: #f72585;">💡 提示: 可以在 Finder 中按 Cmd+Shift+G 输入路径快速找到文件</p>
         </div>
     </div>
 
     <script>
         let allData = null;
-        let currentData = null;
+        let trendChart = null;
+        let selectedProcesses = new Set();
 
         function formatBytes(bytes) {
             if (bytes === 0) return '0 B';
@@ -209,6 +217,14 @@
             const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatBytesShort(bytes) {
+            if (bytes === 0) return '0';
+            const k = 1024;
+            const sizes = ['B', 'K', 'M', 'G', 'T'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
         }
 
         function handleFile(file) {
@@ -229,9 +245,7 @@
             document.getElementById('helpText').classList.add('hidden');
             document.getElementById('content').classList.remove('hidden');
 
-            currentData = data;
-
-            // Get all dates and hours
+            // Get all dates
             const dates = Object.keys(data).sort();
 
             // Update date filter
@@ -253,21 +267,16 @@
 
         function filterData() {
             const selectedDate = document.getElementById('dateFilter').value;
-            const selectedHour = document.getElementById('hourFilter').value;
 
-            // Aggregate data based on filters
+            // Aggregate data based on filter
             const processTotals = {};
             let dates = [];
-            let hours = new Set();
 
-            Object.entries(allData).forEach(([date, hoursData]) => {
+            Object.entries(allData).forEach(([date, timeSlots]) => {
                 if (selectedDate !== 'all' && date !== selectedDate) return;
                 dates.push(date);
 
-                Object.entries(hoursData).forEach(([hour, processes]) => {
-                    if (selectedHour !== 'all' && hour !== selectedHour) return;
-                    hours.add(hour);
-
+                Object.entries(timeSlots).forEach(([timeSlot, processes]) => {
                     Object.entries(processes).forEach(([key, info]) => {
                         const name = info.name || key;
                         if (!processTotals[name]) {
@@ -290,20 +299,6 @@
             document.getElementById('totalTraffic').textContent = formatBytes(totalTraffic);
             document.getElementById('processCount').textContent = Object.keys(processTotals).length;
 
-            // Update hour filter
-            const hourFilter = document.getElementById('hourFilter');
-            const currentHour = hourFilter.value;
-            hourFilter.innerHTML = '<option value="all">全部时间</option>';
-            [...hours].sort((a, b) => parseInt(a) - parseInt(b)).forEach(hour => {
-                const option = document.createElement('option');
-                option.value = hour;
-                option.textContent = `${hour}:00 - ${hour}:59`;
-                hourFilter.appendChild(option);
-            });
-            if ([...hours].includes(currentHour)) {
-                hourFilter.value = currentHour;
-            }
-
             // Render table
             const processes = Object.entries(processTotals).map(([name, data]) => ({
                 name,
@@ -313,8 +308,8 @@
             processes.sort((a, b) => (b.download + b.upload) - (a.download + a.upload));
             renderTable(processes, totalTraffic);
 
-            // Render hourly chart
-            renderHourlyChart(allData, selectedDate);
+            // Update process pills for chart
+            updateProcessPills(processes.slice(0, 10));
         }
 
         function renderTable(processes, totalTraffic) {
@@ -328,7 +323,7 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="process-name" title="${p.name}">${p.name}</td>
+                    <td class="process-name" title="点击查看趋势" data-process="${p.name}">${p.name}</td>
                     <td class="text-right">${formatBytes(p.download)}</td>
                     <td class="text-right">${formatBytes(p.upload)}</td>
                     <td class="text-right">${formatBytes(total)}</td>
@@ -341,40 +336,181 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            // Add click handlers for process names
+            document.querySelectorAll('.process-name').forEach(el => {
+                el.addEventListener('click', () => toggleProcess(el.dataset.process));
+            });
         }
 
-        function renderHourlyChart(data, selectedDate) {
-            const grid = document.getElementById('hourlyGrid');
-            grid.innerHTML = '';
+        function updateProcessPills(processes) {
+            const container = document.getElementById('processPills');
+            container.innerHTML = '';
 
-            const dates = selectedDate === 'all' ? Object.keys(data) : [selectedDate];
+            processes.forEach(p => {
+                const pill = document.createElement('span');
+                pill.className = 'process-pill' + (selectedProcesses.has(p.name) ? ' active' : '');
+                pill.textContent = p.name;
+                pill.addEventListener('click', () => toggleProcess(p.name));
+                container.appendChild(pill);
+            });
+        }
 
-            const hourlyTotals = {};
+        function toggleProcess(processName) {
+            if (selectedProcesses.has(processName)) {
+                selectedProcesses.delete(processName);
+            } else {
+                if (selectedProcesses.size >= 5) {
+                    alert('最多同时选择5个进程');
+                    return;
+                }
+                selectedProcesses.add(processName);
+            }
+
+            // Update UI
+            document.querySelectorAll('.process-name').forEach(el => {
+                el.classList.toggle('selected', el.dataset.process === processName && selectedProcesses.has(processName));
+            });
+            document.querySelectorAll('.process-pill').forEach(el => {
+                el.classList.toggle('active', selectedProcesses.has(el.textContent));
+            });
+
+            updateChart();
+        }
+
+        function updateChart() {
+            const selectedDate = document.getElementById('dateFilter').value;
+            const dates = selectedDate === 'all' ? Object.keys(allData).sort() : [selectedDate];
+
+            // Collect all time slots with data
+            const timeSlots = {};
             dates.forEach(date => {
-                if (!data[date]) return;
-                Object.entries(data[date]).forEach(([hour, processes]) => {
-                    if (!hourlyTotals[hour]) {
-                        hourlyTotals[hour] = { download: 0, upload: 0 };
-                    }
-                    Object.values(processes).forEach(p => {
-                        hourlyTotals[hour].download += p.download || 0;
-                        hourlyTotals[hour].upload += p.upload || 0;
-                    });
+                if (!allData[date]) return;
+                Object.entries(allData[date]).forEach(([timeSlot, processes]) => {
+                    const key = `${date} ${timeSlot}`;
+                    timeSlots[key] = processes;
                 });
             });
 
-            Object.entries(hourlyTotals)
-                .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-                .forEach(([hour, data]) => {
-                    const card = document.createElement('div');
-                    card.className = 'hour-card';
-                    card.innerHTML = `
-                        <div class="hour">${hour}:00</div>
-                        <div class="traffic">⬇️ ${formatBytes(data.download)}</div>
-                        <div class="traffic">⬆️ ${formatBytes(data.upload)}</div>
-                    `;
-                    grid.appendChild(card);
+            // Sort time slots
+            const sortedSlots = Object.keys(timeSlots).sort();
+
+            // Prepare datasets for selected processes
+            const datasets = [];
+            const colors = ['#4cc9f0', '#f72585', '#7209b7', '#4895ef', '#4ade80'];
+            const types = ['download', 'upload'];
+
+            let colorIndex = 0;
+            selectedProcesses.forEach(processName => {
+                const downloadData = sortedSlots.map(slot => {
+                    const processes = timeSlots[slot];
+                    for (const [key, info] of Object.entries(processes)) {
+                        if (info.name === processName) {
+                            return info.download || 0;
+                        }
+                    }
+                    return 0;
                 });
+
+                const uploadData = sortedSlots.map(slot => {
+                    const processes = timeSlots[slot];
+                    for (const [key, info] of Object.entries(processes)) {
+                        if (info.name === processName) {
+                            return info.upload || 0;
+                        }
+                    }
+                    return 0;
+                });
+
+                // Download line
+                datasets.push({
+                    label: `${processName} ⬇️`,
+                    data: downloadData,
+                    borderColor: colors[colorIndex % colors.length],
+                    backgroundColor: colors[colorIndex % colors.length] + '20',
+                    fill: true,
+                    tension: 0.3,
+                    yAxisID: 'y'
+                });
+
+                // Upload line (dashed)
+                datasets.push({
+                    label: `${processName} ⬆️`,
+                    data: uploadData,
+                    borderColor: colors[colorIndex % colors.length],
+                    backgroundColor: 'transparent',
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'y'
+                });
+
+                colorIndex++;
+            });
+
+            // Update or create chart
+            const ctx = document.getElementById('trendChart').getContext('2d');
+
+            if (trendChart) {
+                trendChart.destroy();
+            }
+
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedSlots,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#888',
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatBytes(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#888',
+                                maxRotation: 45,
+                                maxTicksLimit: 20
+                            },
+                            grid: {
+                                color: '#333'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: {
+                                color: '#888',
+                                callback: function(value) {
+                                    return formatBytesShort(value);
+                                }
+                            },
+                            grid: {
+                                color: '#333'
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         // Event listeners
@@ -404,8 +540,14 @@
             }
         });
 
-        document.getElementById('dateFilter').addEventListener('change', filterData);
-        document.getElementById('hourFilter').addEventListener('change', filterData);
+        document.getElementById('dateFilter').addEventListener('change', () => {
+            selectedProcesses.clear();
+            filterData();
+            if (trendChart) {
+                trendChart.destroy();
+                trendChart = null;
+            }
+        });
     </script>
 </body>
 </html>
