@@ -569,6 +569,7 @@ public class ProcessReader: Reader<[Network_Process]> {
     private var _currentHourKey: String = ""
     private let trafficQueue = DispatchQueue(label: "eu.exelban.ProcessTrafficQueue")
     private let trafficDBKey = "process_traffic"
+    private var autoSaveTimer: Timer?
 
     private var currentHourBucket: ProcessTrafficBucket {
         get { self.trafficQueue.sync { self._currentHourBucket } }
@@ -588,6 +589,15 @@ public class ProcessReader: Reader<[Network_Process]> {
     
     public override func setup() {
         self.popup = true
+        // 每5分钟自动保存一次
+        self.autoSaveTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+            self?.autoSave()
+        }
+    }
+
+    private func autoSave() {
+        guard !self.currentHourKey.isEmpty && !self.currentHourBucket.isEmpty else { return }
+        self.saveBucket(self.currentHourKey, self.currentHourBucket)
     }
     
     public override func read() {
@@ -795,6 +805,8 @@ public class ProcessReader: Reader<[Network_Process]> {
     }
 
     public override func terminate() {
+        self.autoSaveTimer?.invalidate()
+        self.autoSaveTimer = nil
         if !self.currentHourKey.isEmpty && !self.currentHourBucket.isEmpty {
             self.saveBucket(self.currentHourKey, self.currentHourBucket)
         }
