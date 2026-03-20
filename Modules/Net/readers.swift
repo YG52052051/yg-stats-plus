@@ -549,6 +549,17 @@ internal class UsageReader: Reader<Network_Usage>, CWEventDelegate {
     }
 }
 
+// MARK: - Process Traffic History
+
+struct ProcessTrafficRecord: Codable {
+    let name: String
+    let pid: Int
+    var download: Int64 = 0
+    var upload: Int64 = 0
+}
+
+typealias ProcessTrafficBucket = [String: ProcessTrafficRecord]
+
 public class ProcessReader: Reader<[Network_Process]> {
     private let title: String = "Network"
     private var previous: [Network_Process] = []
