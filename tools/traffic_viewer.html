@@ -55,15 +55,18 @@
             gap: 15px;
             margin-bottom: 20px;
             flex-wrap: wrap;
+            align-items: center;
         }
         .filter-group {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .filter-group label { color: #888; font-size: 14px; }
-        .filter-group select {
-            padding: 8px 15px;
+        .filter-group label { color: #888; font-size: 14px; white-space: nowrap; }
+        .filter-group select,
+        .filter-group input[type="text"],
+        .filter-group input[type="time"] {
+            padding: 8px 12px;
             font-size: 14px;
             background: #16213e;
             color: #fff;
@@ -71,6 +74,28 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .filter-group input[type="text"] {
+            width: 200px;
+        }
+        .filter-group input[type="text"]:focus,
+        .filter-group input[type="time"]:focus {
+            outline: none;
+            border-color: #f72585;
+        }
+        .filter-group .time-separator {
+            color: #888;
+            font-size: 14px;
+        }
+        .clear-btn {
+            padding: 8px 15px;
+            background: #7209b7;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .clear-btn:hover { background: #560a8a; }
 
         table {
             width: 100%;
@@ -96,6 +121,7 @@
             vertical-align: middle;
         }
         .hidden { display: none; }
+        .highlight { background: rgba(76, 201, 240, 0.3); }
 
         .chart-section {
             margin-top: 30px;
@@ -124,6 +150,12 @@
         }
         .process-pill:hover { background: #1a4a7a; }
         .process-pill.active { background: #4cc9f0; color: #000; }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -166,11 +198,22 @@
 
             <div class="filters">
                 <div class="filter-group">
+                    <label>🔍 关键字:</label>
+                    <input type="text" id="searchInput" placeholder="搜索进程名称...">
+                </div>
+                <div class="filter-group">
                     <label>📅 日期:</label>
                     <select id="dateFilter">
                         <option value="all">全部</option>
                     </select>
                 </div>
+                <div class="filter-group">
+                    <label>⏰ 时间:</label>
+                    <input type="time" id="startTime" value="00:00">
+                    <span class="time-separator">至</span>
+                    <input type="time" id="endTime" value="23:59">
+                </div>
+                <button class="clear-btn" id="clearFilters">清除筛选</button>
             </div>
 
             <table>
@@ -202,7 +245,7 @@
             <p>3. 每5分钟自动保存，每10分钟生成新的数据点</p>
             <p style="margin: 15px 0;">4. 打开本页面，拖入文件:</p>
             <p style="margin: 5px 0;"><code>~/Library/Application Support/Stats/traffic_history.json</code></p>
-            <p style="margin-top: 15px; font-size: 13px; color: #f72585;">💡 提示: 可以在 Finder 中按 Cmd+Shift+G 输入路径快速找到文件</p>
+            <p style="margin-top: 15px; font-size: 13px; color: #4cc9f0;">💡 提示: 支持关键字搜索和时间范围筛选</p>
         </div>
     </div>
 
@@ -265,65 +308,101 @@
             filterData();
         }
 
-        function filterData() {
+        function getAllTimeSlots() {
             const selectedDate = document.getElementById('dateFilter').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const dates = selectedDate === 'all' ? Object.keys(allData).sort() : [selectedDate];
 
-            // Aggregate data based on filter
+            const timeSlots = [];
+            dates.forEach(date => {
+                if (!allData[date]) return;
+                Object.keys(allData[date]).forEach(timeSlot => {
+                    // timeSlot format: "19:20"
+                    const slotTime = timeSlot.split(':')[0] + ':' + timeSlot.split(':')[1];
+                    if (slotTime >= startTime && slotTime <= endTime) {
+                        timeSlots.push({ date, timeSlot, key: `${date} ${timeSlot}` });
+                    }
+                });
+            });
+            return timeSlots.sort((a, b) => a.key.localeCompare(b.key));
+        }
+
+        function filterData() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const timeSlots = getAllTimeSlots();
+
+            // Aggregate data based on filters
             const processTotals = {};
-            let dates = [];
 
-            Object.entries(allData).forEach(([date, timeSlots]) => {
-                if (selectedDate !== 'all' && date !== selectedDate) return;
-                dates.push(date);
-
-                Object.entries(timeSlots).forEach(([timeSlot, processes]) => {
-                    Object.entries(processes).forEach(([key, info]) => {
-                        const name = info.name || key;
-                        if (!processTotals[name]) {
-                            processTotals[name] = { download: 0, upload: 0 };
-                        }
-                        processTotals[name].download += info.download || 0;
-                        processTotals[name].upload += info.upload || 0;
-                    });
+            timeSlots.forEach(({ date, timeSlot }) => {
+                const processes = allData[date][timeSlot];
+                Object.entries(processes).forEach(([key, info]) => {
+                    const name = info.name || key;
+                    if (!processTotals[name]) {
+                        processTotals[name] = { download: 0, upload: 0 };
+                    }
+                    processTotals[name].download += info.download || 0;
+                    processTotals[name].upload += info.upload || 0;
                 });
             });
 
-            // Calculate totals
-            const totalDownload = Object.values(processTotals).reduce((sum, p) => sum + p.download, 0);
-            const totalUpload = Object.values(processTotals).reduce((sum, p) => sum + p.upload, 0);
+            // Filter by search term
+            let filteredProcesses = Object.entries(processTotals).map(([name, data]) => ({
+                name,
+                download: data.download,
+                upload: data.upload
+            }));
+
+            if (searchTerm) {
+                filteredProcesses = filteredProcesses.filter(p =>
+                    p.name.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Sort by total traffic
+            filteredProcesses.sort((a, b) => (b.download + b.upload) - (a.download + a.upload));
+
+            // Calculate totals for filtered data
+            const totalDownload = filteredProcesses.reduce((sum, p) => sum + p.download, 0);
+            const totalUpload = filteredProcesses.reduce((sum, p) => sum + p.upload, 0);
             const totalTraffic = totalDownload + totalUpload;
 
             // Update stats
             document.getElementById('totalDownload').textContent = formatBytes(totalDownload);
             document.getElementById('totalUpload').textContent = formatBytes(totalUpload);
             document.getElementById('totalTraffic').textContent = formatBytes(totalTraffic);
-            document.getElementById('processCount').textContent = Object.keys(processTotals).length;
+            document.getElementById('processCount').textContent = filteredProcesses.length;
 
-            // Render table
-            const processes = Object.entries(processTotals).map(([name, data]) => ({
-                name,
-                download: data.download,
-                upload: data.upload
-            }));
-            processes.sort((a, b) => (b.download + b.upload) - (a.download + a.upload));
-            renderTable(processes, totalTraffic);
-
-            // Update process pills for chart
-            updateProcessPills(processes.slice(0, 10));
+            renderTable(filteredProcesses, totalTraffic, searchTerm);
+            updateProcessPills(filteredProcesses.slice(0, 10));
+            updateChart();
         }
 
-        function renderTable(processes, totalTraffic) {
+        function renderTable(processes, totalTraffic, searchTerm) {
             const tbody = document.getElementById('processTable');
             tbody.innerHTML = '';
+
+            if (processes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="no-data">没有找到匹配的数据</td></tr>';
+                return;
+            }
 
             processes.forEach(p => {
                 const total = p.download + p.upload;
                 const percentage = totalTraffic > 0 ? (total / totalTraffic * 100).toFixed(1) : 0;
                 const barWidth = totalTraffic > 0 ? (total / totalTraffic * 100) : 0;
 
+                // Highlight search term
+                let displayName = p.name;
+                if (searchTerm) {
+                    const regex = new RegExp(`(${searchTerm})`, 'gi');
+                    displayName = p.name.replace(regex, '<span class="highlight">$1</span>');
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="process-name" title="点击查看趋势" data-process="${p.name}">${p.name}</td>
+                    <td class="process-name" title="点击查看趋势" data-process="${p.name}">${displayName}</td>
                     <td class="text-right">${formatBytes(p.download)}</td>
                     <td class="text-right">${formatBytes(p.upload)}</td>
                     <td class="text-right">${formatBytes(total)}</td>
@@ -379,31 +458,16 @@
         }
 
         function updateChart() {
-            const selectedDate = document.getElementById('dateFilter').value;
-            const dates = selectedDate === 'all' ? Object.keys(allData).sort() : [selectedDate];
-
-            // Collect all time slots with data
-            const timeSlots = {};
-            dates.forEach(date => {
-                if (!allData[date]) return;
-                Object.entries(allData[date]).forEach(([timeSlot, processes]) => {
-                    const key = `${date} ${timeSlot}`;
-                    timeSlots[key] = processes;
-                });
-            });
-
-            // Sort time slots
-            const sortedSlots = Object.keys(timeSlots).sort();
+            const timeSlots = getAllTimeSlots();
 
             // Prepare datasets for selected processes
             const datasets = [];
             const colors = ['#4cc9f0', '#f72585', '#7209b7', '#4895ef', '#4ade80'];
-            const types = ['download', 'upload'];
 
             let colorIndex = 0;
             selectedProcesses.forEach(processName => {
-                const downloadData = sortedSlots.map(slot => {
-                    const processes = timeSlots[slot];
+                const downloadData = timeSlots.map(slot => {
+                    const processes = allData[slot.date][slot.timeSlot];
                     for (const [key, info] of Object.entries(processes)) {
                         if (info.name === processName) {
                             return info.download || 0;
@@ -412,8 +476,8 @@
                     return 0;
                 });
 
-                const uploadData = sortedSlots.map(slot => {
-                    const processes = timeSlots[slot];
+                const uploadData = timeSlots.map(slot => {
+                    const processes = allData[slot.date][slot.timeSlot];
                     for (const [key, info] of Object.entries(processes)) {
                         if (info.name === processName) {
                             return info.upload || 0;
@@ -455,10 +519,12 @@
                 trendChart.destroy();
             }
 
+            const labels = timeSlots.map(s => s.key);
+
             trendChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: sortedSlots,
+                    labels: labels,
                     datasets: datasets
                 },
                 options: {
@@ -513,6 +579,15 @@
             });
         }
 
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('dateFilter').value = 'all';
+            document.getElementById('startTime').value = '00:00';
+            document.getElementById('endTime').value = '23:59';
+            selectedProcesses.clear();
+            filterData();
+        }
+
         // Event listeners
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
@@ -540,14 +615,12 @@
             }
         });
 
-        document.getElementById('dateFilter').addEventListener('change', () => {
-            selectedProcesses.clear();
-            filterData();
-            if (trendChart) {
-                trendChart.destroy();
-                trendChart = null;
-            }
-        });
+        // Filter event listeners
+        document.getElementById('searchInput').addEventListener('input', filterData);
+        document.getElementById('dateFilter').addEventListener('change', filterData);
+        document.getElementById('startTime').addEventListener('change', filterData);
+        document.getElementById('endTime').addEventListener('change', filterData);
+        document.getElementById('clearFilters').addEventListener('click', clearFilters);
     </script>
 </body>
 </html>
