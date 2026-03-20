@@ -752,16 +752,7 @@ public class ProcessReader: Reader<[Network_Process]> {
 
     private func saveBucket(_ key: String, _ bucket: ProcessTrafficBucket) {
         guard !bucket.isEmpty else { return }
-        do {
-            let data = try JSONEncoder().encode(bucket)
-            guard let json = String(data: data, encoding: .utf8) else { return }
-            let success = DB.shared.lldb?.insert(key, value: json) ?? false
-            if !success {
-                debug("Failed to save process traffic bucket: \(key)")
-            }
-        } catch {
-            debug("Failed to encode process traffic bucket: \(error)")
-        }
+        DB.shared.insert(key: key, value: bucket, ts: false, force: true)
     }
 
     public override func terminate() {
