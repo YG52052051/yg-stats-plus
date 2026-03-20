@@ -12,7 +12,7 @@
 import Cocoa
 import Carbon
 
-extension String: @retroactive LocalizedError {
+extension String: LocalizedError {
     public var errorDescription: String? { return self }
     
     public var nilIfEmpty: String? { self.isEmpty ? nil : self }

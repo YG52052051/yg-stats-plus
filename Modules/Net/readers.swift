@@ -21,7 +21,7 @@ struct ipResponse: Decodable {
 }
 
 // swiftlint:disable control_statement
-extension CWPHYMode: @retroactive CustomStringConvertible {
+extension CWPHYMode: CustomStringConvertible {
     public var description: String {
         switch(self) {
         case .mode11a:  return "802.11a"
@@ -36,7 +36,7 @@ extension CWPHYMode: @retroactive CustomStringConvertible {
     }
 }
 
-extension CWInterfaceMode: @retroactive CustomStringConvertible {
+extension CWInterfaceMode: CustomStringConvertible {
     public var description: String {
         switch(self) {
         case .hostAP:       return "AP"
@@ -48,7 +48,7 @@ extension CWInterfaceMode: @retroactive CustomStringConvertible {
     }
 }
 
-extension CWSecurity: @retroactive CustomStringConvertible {
+extension CWSecurity: CustomStringConvertible {
     public var description: String {
         switch(self) {
         case .none:               return "none"
@@ -71,7 +71,7 @@ extension CWSecurity: @retroactive CustomStringConvertible {
     }
 }
 
-extension CWChannelBand: @retroactive CustomStringConvertible {
+extension CWChannelBand: CustomStringConvertible {
     public var description: String {
         switch(self) {
         case .band2GHz:     return "2 GHz"
@@ -83,7 +83,7 @@ extension CWChannelBand: @retroactive CustomStringConvertible {
     }
 }
 
-extension CWChannelWidth: @retroactive CustomStringConvertible {
+extension CWChannelWidth: CustomStringConvertible {
     public var description: String {
         switch(self) {
         case .width20MHz:   return "20 MHz"
