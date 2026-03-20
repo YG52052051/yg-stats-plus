@@ -712,6 +712,7 @@ public class ProcessReader: Reader<[Network_Process]> {
         }
         
         self.callback(processes.suffix(self.numberOfProcesses).reversed())
+        self.recordTraffic(Array(processes.suffix(self.numberOfProcesses).reversed()))
     }
 
     // MARK: - Traffic History
