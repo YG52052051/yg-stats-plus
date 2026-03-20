@@ -753,6 +753,45 @@ public class ProcessReader: Reader<[Network_Process]> {
     private func saveBucket(_ key: String, _ bucket: ProcessTrafficBucket) {
         guard !bucket.isEmpty else { return }
         DB.shared.insert(key: key, value: bucket, ts: false, force: true)
+        self.exportToJson()
+    }
+
+    private func exportToJson() {
+        let fileManager = FileManager.default
+        guard let supportPath = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("Stats") else { return }
+
+        try? fileManager.createDirectory(at: supportPath, withIntermediateDirectories: true, attributes: nil)
+        let filePath = supportPath.appendingPathComponent("traffic_history.json")
+
+        do {
+            var allData: [String: [String: ProcessTrafficBucket]] = [:]
+
+            // 读取现有数据
+            if fileManager.fileExists(atPath: filePath.path),
+               let existingData = fileManager.contents(atPath: filePath.path),
+               let existing = try? JSONDecoder().decode([String: [String: ProcessTrafficBucket]].self, from: existingData) {
+                allData = existing
+            }
+
+            // 添加/更新当前小时的数据
+            let parts = self.currentHourKey.split(separator: "|")
+            if parts.count >= 3 {
+                let date = String(parts[1])
+                let hour = String(parts[2])
+                if allData[date] == nil {
+                    allData[date] = [:]
+                }
+                allData[date]?[hour] = self.currentHourBucket
+            }
+
+            // 保存到文件
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            let jsonData = try encoder.encode(allData)
+            try jsonData.write(to: filePath)
+        } catch {
+            debug("Failed to export traffic history to JSON: \(error)")
+        }
     }
 
     public override func terminate() {
