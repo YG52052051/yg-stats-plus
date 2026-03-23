@@ -569,9 +569,13 @@ public class ProcessReader: Reader<[Network_Process]> {
     private var _currentTimeSlotKey: String = ""
     private let trafficQueue = DispatchQueue(label: "eu.exelban.ProcessTrafficQueue")
     private let trafficDBKey = "process_traffic"
+
+    // 后台持续记录的定时器（不受 popup 状态影响）
+    private var backgroundReadTimer: Timer?
     private var autoSaveTimer: Timer?
 
     // Constants
+    private let readInterval: TimeInterval = 2  // seconds
     private let autoSaveInterval: TimeInterval = 300  // 5 minutes
 
     private var currentBucket: ProcessTrafficBucket {
@@ -589,39 +593,91 @@ public class ProcessReader: Reader<[Network_Process]> {
             return Store.shared.int(key: "\(self.title)_processes", defaultValue: 8)
         }
     }
-    
+
     public override func setup() {
         self.popup = true
-        // 使用父类的 Repeater 机制管理 read() 定时器
-        self.setInterval(Store.shared.int(key: "\(self.title)_updateTopInterval", defaultValue: 2))
-        self.unlock()
+        // 启动后台持续记录的定时器
+        self.startBackgroundRecording()
     }
 
-    public override func start() {
-        super.start()
-        // 启动自动保存定时器
+    /// 启动后台持续记录（不受 popup 状态影响）
+    private func startBackgroundRecording() {
+        // 读取流量数据的定时器
+        self.backgroundReadTimer = Timer.scheduledTimer(withTimeInterval: readInterval, repeats: true) { [weak self] _ in
+            self?.readAndRecordTraffic()
+        }
+        // 自动保存定时器
         self.autoSaveTimer = Timer.scheduledTimer(withTimeInterval: autoSaveInterval, repeats: true) { [weak self] _ in
             self?.autoSave()
         }
     }
 
+    public override func start() {
+        super.start()
+        // popup 打开时不需要额外操作，后台记录一直在运行
+    }
+
     public override func pause() {
         super.pause()
-        // 停止自动保存定时器
-        self.autoSaveTimer?.invalidate()
-        self.autoSaveTimer = nil
+        // popup 关闭时不停止后台记录，继续在后台采集数据
+        // 只有在 terminate() 时才会停止
     }
 
     private func autoSave() {
         guard !self.currentTimeSlotKey.isEmpty && !self.currentBucket.isEmpty else { return }
         self.saveBucket(self.currentTimeSlotKey, self.currentBucket)
     }
-    
-    public override func read() {
-        if self.numberOfProcesses == 0 {
-            return
+
+    /// 后台持续读取流量并记录（不受 popup 状态影响）
+    private func readAndRecordTraffic() {
+        let result = self.fetchAndCalculateIncrement()
+        if result.shouldRecord {
+            self.recordTraffic(result.processes)
         }
-        
+    }
+
+    /// 读取进程数据并计算增量
+    /// - Returns: (增量进程列表, 是否应该记录)
+    private func fetchAndCalculateIncrement() -> (processes: [Network_Process], shouldRecord: Bool) {
+        if self.numberOfProcesses == 0 {
+            return ([], false)
+        }
+
+        let list = self.fetchProcessListFromNettop()
+        if list.isEmpty {
+            return ([], false)
+        }
+
+        var processes: [Network_Process] = []
+        var shouldRecord = true
+
+        if self.previous.isEmpty {
+            self.previous = list
+            processes = list
+            shouldRecord = false  // 第一次读取时只有累计值，不记录
+        } else {
+            self.previous.forEach { (pp: Network_Process) in
+                if let i = list.firstIndex(where: { $0.pid == pp.pid }) {
+                    let p = list[i]
+
+                    var download = p.download - pp.download
+                    var upload = p.upload - pp.upload
+                    let time = download == 0 && upload == 0 ? pp.time : Date()
+
+                    if download < 0 { download = 0 }
+                    if upload < 0 { upload = 0 }
+
+                    processes.append(Network_Process(pid: p.pid, name: p.name, time: time, download: download, upload: upload))
+                }
+            }
+            self.previous = list
+        }
+
+        return (processes, shouldRecord)
+    }
+
+    /// 从 nettop 获取进程列表（累计值）
+    private func fetchProcessListFromNettop() -> [Network_Process] {
         let task = Process()
         task.launchPath = "/usr/bin/nettop"
         task.arguments = ["-P", "-L", "1", "-n", "-k", "time,interface,state,rx_dupe,rx_ooo,re-tx,rtt_avg,rcvsize,tx_win,tc_class,tc_mgt,cc_algo,P,C,R,W,arch"]
@@ -629,34 +685,33 @@ public class ProcessReader: Reader<[Network_Process]> {
             "NSUnbufferedIO": "YES",
             "LC_ALL": "en_US.UTF-8"
         ]
-        
+
         let inputPipe = Pipe()
         let outputPipe = Pipe()
         let errorPipe = Pipe()
-        
+
         defer {
             inputPipe.fileHandleForWriting.closeFile()
             outputPipe.fileHandleForReading.closeFile()
             errorPipe.fileHandleForReading.closeFile()
         }
-        
+
         task.standardInput = inputPipe
         task.standardOutput = outputPipe
         task.standardError = errorPipe
-        
+
         do {
             try task.run()
         } catch let error {
-            print(error)
-            return
+            debug("nettop run error: \(error)", log: self.log)
+            return []
         }
-        
+
         let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
-        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(data: outputData, encoding: .utf8)
-        _ = String(data: errorData, encoding: .utf8)
-        guard let output, !output.isEmpty else { return }
-        
+        guard let output = String(data: outputData, encoding: .utf8), !output.isEmpty else {
+            return []
+        }
+
         var list: [Network_Process] = []
         var firstLine = false
         output.enumerateLines { (line, _) in
@@ -664,15 +719,13 @@ public class ProcessReader: Reader<[Network_Process]> {
                 firstLine = true
                 return
             }
-            
+
             let parsedLine = line.split(separator: ",")
-            guard parsedLine.count >= 3 else {
-                return
-            }
-            
+            guard parsedLine.count >= 3 else { return }
+
             var process = Network_Process()
             process.time = Date()
-            
+
             let nameArray = parsedLine[0].split(separator: ".")
             if let pid = nameArray.last {
                 process.pid = Int(pid) ?? 0
@@ -682,68 +735,45 @@ public class ProcessReader: Reader<[Network_Process]> {
             } else {
                 process.name = nameArray.dropLast().joined(separator: ".")
             }
-            
+
             if process.name == "" {
                 process.name = "\(process.pid)"
             }
-            
+
             if let download = Int(parsedLine[1]) {
                 process.download = download
             }
             if let upload = Int(parsedLine[2]) {
                 process.upload = upload
             }
-            
+
             list.append(process)
         }
-        
-        var processes: [Network_Process] = []
-        var shouldRecord = true  // 是否应该记录流量
-        if self.previous.isEmpty {
-            self.previous = list
-            processes = list
-            shouldRecord = false  // 第一次读取时只有累计值，不记录
-        } else {
-            self.previous.forEach { (pp: Network_Process) in
-                if let i = list.firstIndex(where: { $0.pid == pp.pid }) {
-                    let p = list[i]
-                    
-                    var download = p.download - pp.download
-                    var upload = p.upload - pp.upload
-                    let time = download == 0 && upload == 0 ? pp.time : Date()
-                    list[i].time = time
-                    
-                    if download < 0 {
-                        download = 0
-                    }
-                    if upload < 0 {
-                        upload = 0
-                    }
-                    
-                    processes.append(Network_Process(pid: p.pid, name: p.name, time: time, download: download, upload: upload))
-                }
+
+        return list
+    }
+
+    /// popup 显示时调用（只更新 UI，不重复记录）
+    public override func read() {
+        let result = self.fetchAndCalculateIncrement()
+
+        // 排序并更新 popup UI
+        let sorted = result.processes.sorted { a, b in
+            let aMax = max(a.download, a.upload)
+            let bMax = max(b.download, b.upload)
+            let aMin = min(a.download, a.upload)
+            let bMin = min(b.download, b.upload)
+
+            if aMax == bMax && aMin == bMin {
+                return a.time < b.time
+            } else if aMax == bMax {
+                return aMin < bMin
             }
-            self.previous = list
+            return aMax < bMax
         }
-        
-        processes.sort {
-            let firstMax = max($0.download, $0.upload)
-            let secondMax = max($1.download, $1.upload)
-            let firstMin = min($0.download, $0.upload)
-            let secondMin = min($1.download, $1.upload)
-            
-            if firstMax == secondMax && firstMin == secondMin { // download and upload values are the same, sort by time
-                return $0.time < $1.time
-            } else if firstMax == secondMax && firstMin != secondMin { // max values are the same, min not. Sort by min values
-                return firstMin < secondMin
-            }
-            return firstMax < secondMax // max values are not the same, sort by max value
-        }
-        
-        self.callback(processes.suffix(self.numberOfProcesses).reversed())
-        if shouldRecord {
-            self.recordTraffic(processes)  // 只有有增量数据时才记录
-        }
+
+        self.callback(sorted.suffix(self.numberOfProcesses).reversed())
+        // 注意：不在这里记录流量，后台定时器会负责记录
     }
 
     // MARK: - Traffic History
@@ -830,8 +860,12 @@ public class ProcessReader: Reader<[Network_Process]> {
     }
 
     public override func terminate() {
+        // 停止后台定时器
+        self.backgroundReadTimer?.invalidate()
+        self.backgroundReadTimer = nil
         self.autoSaveTimer?.invalidate()
         self.autoSaveTimer = nil
+        // 保存最后的数据
         if !self.currentTimeSlotKey.isEmpty && !self.currentBucket.isEmpty {
             self.saveBucket(self.currentTimeSlotKey, self.currentBucket)
         }
