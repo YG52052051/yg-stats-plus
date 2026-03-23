@@ -169,10 +169,17 @@
             </label>
             <input type="file" id="fileInput" accept=".json">
             <p>JSON 文件位置: <code>~/Library/Application Support/Stats/traffic_history.json</code></p>
-            <p style="margin-top: 15px; font-size: 13px;">⚠️ 首次使用需要先运行 Stats.app 一段时间来收集数据</p>
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; align-items: center;">
+                <button id="autoLoadBtn" class="clear-btn" style="background: #4cc9f0;">🔄 自动加载最新数据</button>
+                <span id="lastLoadTime" style="font-size: 12px; color: #888;"></span>
+            </div>
         </div>
 
         <div id="content" class="hidden">
+            <div style="text-align: right; margin-bottom: 10px;">
+                <button id="refreshBtn" class="clear-btn" style="background: #4cc9f0;">🔄 刷新数据</button>
+                <span id="contentLastLoad" style="font-size: 12px; color: #888; margin-left: 10px;"></span>
+            </div>
             <div class="stats-grid">
                 <div class="stat-card download">
                     <h3>📥 总下载</h3>
@@ -588,6 +595,95 @@
             filterData();
         }
 
+        // 自动加载功能
+        let savedFileHandle = null;
+        let lastFilePath = null;
+
+        // 页面加载时尝试自动加载
+        async function tryAutoLoad() {
+            const savedPath = localStorage.getItem('traffic_json_path');
+            if (savedPath) {
+                lastFilePath = savedPath;
+                updateLastLoadTime();
+                // 显示提示
+                document.getElementById('lastLoadTime').textContent = '已记住文件路径，请点击按钮加载数据';
+            }
+        }
+
+        function updateLastLoadTime() {
+            const now = new Date();
+            const timeStr = `上次加载: ${now.toLocaleTimeString()}`;
+            document.getElementById('lastLoadTime').textContent = timeStr;
+            const contentLastLoad = document.getElementById('contentLastLoad');
+            if (contentLastLoad) {
+                contentLastLoad.textContent = timeStr;
+            }
+        }
+
+        // 使用 File System Access API（如果支持）或重新选择文件
+        async function autoLoadFile() {
+            // 尝试使用 File System Access API
+            if ('showOpenFilePicker' in window) {
+                try {
+                    if (!savedFileHandle) {
+                        savedFileHandle = await window.showOpenFilePicker({
+                            types: [{
+                                description: 'JSON Files',
+                                accept: { 'application/json': ['.json'] }
+                            }],
+                            startIn: 'documents'
+                        });
+                        savedFileHandle = savedFileHandle[0];
+                    }
+
+                    const file = await savedFileHandle.getFile();
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            allData = JSON.parse(e.target.result);
+                            displayData(allData);
+                            updateLastLoadTime();
+                            localStorage.setItem('traffic_json_path', file.name);
+                        } catch (err) {
+                            alert('解析 JSON 文件失败: ' + err.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.error('Error:', err);
+                    }
+                }
+            } else {
+                // 回退到传统文件选择
+                document.getElementById('fileInput').click();
+            }
+        }
+
+        // 刷新数据（重新读取文件）
+        async function refreshData() {
+            if (savedFileHandle) {
+                try {
+                    const file = await savedFileHandle.getFile();
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            allData = JSON.parse(e.target.result);
+                            displayData(allData);
+                            updateLastLoadTime();
+                        } catch (err) {
+                            alert('解析 JSON 文件失败: ' + err.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                } catch (err) {
+                    console.error('Refresh error:', err);
+                }
+            } else {
+                autoLoadFile();
+            }
+        }
+
         // Event listeners
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
@@ -595,6 +691,7 @@
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 handleFile(e.target.files[0]);
+                updateLastLoadTime();
             }
         });
 
@@ -612,6 +709,7 @@
             uploadArea.classList.remove('dragover');
             if (e.dataTransfer.files.length > 0) {
                 handleFile(e.dataTransfer.files[0]);
+                updateLastLoadTime();
             }
         });
 
@@ -621,6 +719,11 @@
         document.getElementById('startTime').addEventListener('change', filterData);
         document.getElementById('endTime').addEventListener('change', filterData);
         document.getElementById('clearFilters').addEventListener('click', clearFilters);
+        document.getElementById('autoLoadBtn').addEventListener('click', autoLoadFile);
+        document.getElementById('refreshBtn').addEventListener('click', refreshData);
+
+        // 页面加载时尝试自动加载
+        tryAutoLoad();
     </script>
 </body>
 </html>
