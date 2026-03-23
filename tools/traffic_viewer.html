@@ -598,15 +598,35 @@
         // 自动加载功能
         let savedFileHandle = null;
         let lastFilePath = null;
+        const JSON_FILE = 'traffic_history.json';
 
         // 页面加载时尝试自动加载
         async function tryAutoLoad() {
-            const savedPath = localStorage.getItem('traffic_json_path');
-            if (savedPath) {
-                lastFilePath = savedPath;
+            // 如果是通过 HTTP 服务器访问，尝试直接 fetch JSON 文件
+            if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+                await loadFromServer();
+            } else {
+                // 本地文件访问，显示提示
+                const savedPath = localStorage.getItem('traffic_json_path');
+                if (savedPath) {
+                    lastFilePath = savedPath;
+                    document.getElementById('lastLoadTime').textContent = '已记住文件路径，请点击按钮加载数据';
+                }
+            }
+        }
+
+        // 从服务器加载 JSON 文件
+        async function loadFromServer() {
+            try {
+                const response = await fetch(JSON_FILE);
+                if (!response.ok) throw new Error('文件不存在');
+                allData = await response.json();
+                displayData(allData);
                 updateLastLoadTime();
-                // 显示提示
-                document.getElementById('lastLoadTime').textContent = '已记住文件路径，请点击按钮加载数据';
+                console.log('自动加载成功');
+            } catch (err) {
+                console.log('自动加载失败:', err.message);
+                document.getElementById('lastLoadTime').textContent = '自动加载失败，请手动选择文件';
             }
         }
 
@@ -662,7 +682,10 @@
 
         // 刷新数据（重新读取文件）
         async function refreshData() {
-            if (savedFileHandle) {
+            // 如果是通过 HTTP 服务器访问，直接 fetch
+            if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+                await loadFromServer();
+            } else if (savedFileHandle) {
                 try {
                     const file = await savedFileHandle.getFile();
                     const reader = new FileReader();
