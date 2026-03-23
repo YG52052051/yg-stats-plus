@@ -1051,6 +1051,7 @@
                 allData = await response.json();
                 displayData(allData);
                 updateLastLoadTime();
+                startAutoRefresh();
                 console.log('自动加载成功');
             } catch (err) {
                 console.log('自动加载失败:', err.message);
@@ -1122,7 +1123,8 @@
         async function refreshData() {
             if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
                 await loadFromServer();
-                countdown = 10; // Reset countdown on manual refresh
+                countdown = 10;
+                document.getElementById('refreshText').textContent = `自动刷新: ${countdown}秒`;
             } else if (savedFileHandle) {
                 try {
                     const file = await savedFileHandle.getFile();
