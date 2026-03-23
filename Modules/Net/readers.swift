@@ -698,9 +698,11 @@ public class ProcessReader: Reader<[Network_Process]> {
         }
         
         var processes: [Network_Process] = []
+        var shouldRecord = true  // 是否应该记录流量
         if self.previous.isEmpty {
             self.previous = list
             processes = list
+            shouldRecord = false  // 第一次读取时只有累计值，不记录
         } else {
             self.previous.forEach { (pp: Network_Process) in
                 if let i = list.firstIndex(where: { $0.pid == pp.pid }) {
@@ -739,7 +741,9 @@ public class ProcessReader: Reader<[Network_Process]> {
         }
         
         self.callback(processes.suffix(self.numberOfProcesses).reversed())
-        self.recordTraffic(processes)  // 记录所有进程，不限制数量
+        if shouldRecord {
+            self.recordTraffic(processes)  // 只有有增量数据时才记录
+        }
     }
 
     // MARK: - Traffic History
