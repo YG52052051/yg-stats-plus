@@ -570,10 +570,8 @@ public class ProcessReader: Reader<[Network_Process]> {
     private let trafficQueue = DispatchQueue(label: "eu.exelban.ProcessTrafficQueue")
     private let trafficDBKey = "process_traffic"
     private var autoSaveTimer: Timer?
-    private var readTimer: Timer?
 
     // Constants
-    private let readInterval: Double = 2  // seconds
     private let autoSaveInterval: TimeInterval = 300  // 5 minutes
 
     private var currentBucket: ProcessTrafficBucket {
@@ -594,14 +592,24 @@ public class ProcessReader: Reader<[Network_Process]> {
     
     public override func setup() {
         self.popup = true
-        // 启动定时器周期性调用 read()（因为 popup=true 时父类不会启动定时器）
-        self.readTimer = Timer.scheduledTimer(withTimeInterval: readInterval, repeats: true) { [weak self] _ in
-            self?.read()
-        }
-        // 每5分钟自动保存一次
+        // 使用父类的 Repeater 机制管理 read() 定时器
+        self.setInterval(Store.shared.int(key: "\(self.title)_updateTopInterval", defaultValue: 2))
+        self.unlock()
+    }
+
+    public override func start() {
+        super.start()
+        // 启动自动保存定时器
         self.autoSaveTimer = Timer.scheduledTimer(withTimeInterval: autoSaveInterval, repeats: true) { [weak self] _ in
             self?.autoSave()
         }
+    }
+
+    public override func pause() {
+        super.pause()
+        // 停止自动保存定时器
+        self.autoSaveTimer?.invalidate()
+        self.autoSaveTimer = nil
     }
 
     private func autoSave() {
@@ -818,8 +826,6 @@ public class ProcessReader: Reader<[Network_Process]> {
     }
 
     public override func terminate() {
-        self.readTimer?.invalidate()
-        self.readTimer = nil
         self.autoSaveTimer?.invalidate()
         self.autoSaveTimer = nil
         if !self.currentTimeSlotKey.isEmpty && !self.currentBucket.isEmpty {
