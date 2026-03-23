@@ -572,6 +572,10 @@ public class ProcessReader: Reader<[Network_Process]> {
     private var autoSaveTimer: Timer?
     private var readTimer: Timer?
 
+    // Constants
+    private let readInterval: Double = 2  // seconds
+    private let autoSaveInterval: TimeInterval = 300  // 5 minutes
+
     private var currentBucket: ProcessTrafficBucket {
         get { self.trafficQueue.sync { self._currentBucket } }
         set { self.trafficQueue.sync { self._currentBucket = newValue } }
@@ -591,11 +595,11 @@ public class ProcessReader: Reader<[Network_Process]> {
     public override func setup() {
         self.popup = true
         // 启动定时器周期性调用 read()（因为 popup=true 时父类不会启动定时器）
-        self.readTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+        self.readTimer = Timer.scheduledTimer(withTimeInterval: readInterval, repeats: true) { [weak self] _ in
             self?.read()
         }
         // 每5分钟自动保存一次
-        self.autoSaveTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+        self.autoSaveTimer = Timer.scheduledTimer(withTimeInterval: autoSaveInterval, repeats: true) { [weak self] _ in
             self?.autoSave()
         }
     }
