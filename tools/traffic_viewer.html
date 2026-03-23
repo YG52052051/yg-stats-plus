@@ -990,9 +990,6 @@
         }
 
         async function loadFromServer() {
-            const indicator = document.getElementById('refreshIndicator');
-            indicator.classList.add('loading');
-
             try {
                 const response = await fetch(JSON_FILE + '?t=' + Date.now());
                 if (!response.ok) throw new Error('文件不存在');
@@ -1003,8 +1000,6 @@
             } catch (err) {
                 console.log('自动加载失败:', err.message);
                 document.getElementById('lastLoadTime').textContent = '自动加载失败，请手动选择文件';
-            } finally {
-                indicator.classList.remove('loading');
             }
         }
 
