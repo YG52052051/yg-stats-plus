@@ -6,162 +6,616 @@
     <title>Stats - Process Traffic History</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --secondary: #ec4899;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --bg-dark: #0f0f1a;
+            --bg-card: rgba(30, 30, 50, 0.8);
+            --bg-card-hover: rgba(40, 40, 70, 0.9);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a2e;
-            color: #eee;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-        h1 { text-align: center; margin-bottom: 10px; color: #4cc9f0; }
-        .subtitle { text-align: center; color: #888; margin-bottom: 20px; }
-        .upload-area {
-            border: 2px dashed #4cc9f0;
-            border-radius: 10px;
-            padding: 30px;
+
+        /* Animated background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+            z-index: -1;
+            animation: bgPulse 15s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.02); }
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header with glow effect */
+        .header {
             text-align: center;
-            margin-bottom: 20px;
-            transition: all 0.3s;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
         }
-        .upload-area:hover { background: rgba(76, 201, 240, 0.1); }
-        .upload-area.dragover { background: rgba(76, 201, 240, 0.2); border-color: #fff; }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 5s ease infinite;
+            text-shadow: 0 0 40px var(--primary-glow);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-size: 1rem;
+        }
+
+        /* Auto-refresh indicator */
+        .refresh-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .refresh-indicator .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        .refresh-indicator .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        .refresh-indicator.loading .spinner { display: block; }
+        .refresh-indicator.loading .dot { display: none; }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Upload area with glassmorphism */
+        .upload-area {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
+        }
+
+        .upload-area:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+
+        .upload-area.dragover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+            transform: scale(1.02);
+        }
+
         .upload-area input { display: none; }
-        .upload-area label { cursor: pointer; font-size: 16px; }
-        .upload-area p { margin-top: 10px; color: #888; font-size: 14px; }
+        .upload-area label {
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            display: block;
+        }
+
+        .upload-area p { margin-top: 12px; color: var(--text-secondary); font-size: 0.9rem; }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+        }
+
+        /* Stats grid with staggered animation */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 20px;
+            margin-bottom: 25px;
         }
-        .stat-card {
-            background: #16213e;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-        }
-        .stat-card h3 { color: #888; font-size: 13px; margin-bottom: 8px; }
-        .stat-card .value { font-size: 24px; font-weight: bold; }
-        .stat-card.download .value { color: #4cc9f0; }
-        .stat-card.upload .value { color: #f72585; }
-        .stat-card.total .value { color: #7209b7; }
-        .stat-card.processes .value { color: #4895ef; }
-        .stat-card.dates .value { color: #4ade80; font-size: 18px; }
 
+        .stat-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+        .stat-card:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card:hover::before { opacity: 1; }
+
+        .stat-card .icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .stat-card h3 {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card.download .value {
+            background: linear-gradient(135deg, var(--accent), #22d3ee);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .stat-card.upload .value {
+            background: linear-gradient(135deg, var(--secondary), #f472b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .stat-card.total .value {
+            background: linear-gradient(135deg, var(--primary), #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        /* Filters */
         .filters {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
             align-items: center;
+            padding: 20px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            animation: fadeInUp 0.6s ease-out 0.3s backwards;
         }
+
         .filter-group {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
-        .filter-group label { color: #888; font-size: 14px; white-space: nowrap; }
-        .filter-group select,
-        .filter-group input[type="text"],
-        .filter-group input[type="time"] {
-            padding: 8px 12px;
-            font-size: 14px;
-            background: #16213e;
-            color: #fff;
-            border: 1px solid #4cc9f0;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .filter-group input[type="text"] {
-            width: 200px;
-        }
-        .filter-group input[type="text"]:focus,
-        .filter-group input[type="time"]:focus {
-            outline: none;
-            border-color: #f72585;
-        }
-        .filter-group .time-separator {
-            color: #888;
-            font-size: 14px;
-        }
-        .clear-btn {
-            padding: 8px 15px;
-            background: #7209b7;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .clear-btn:hover { background: #560a8a; }
 
-        table {
+        .filter-group label {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 14px;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .filter-group input[type="text"] { width: 200px; }
+        .filter-group input[type="time"] { width: 100px; }
+
+        /* Table with modern design */
+        .table-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out 0.4s backwards;
+        }
+
+        .table-container table {
             width: 100%;
             border-collapse: collapse;
-            background: #16213e;
-            border-radius: 10px;
-            overflow: hidden;
         }
-        th, td { padding: 12px 15px; text-align: left; }
-        th { background: #0f3460; color: #4cc9f0; font-weight: 500; }
-        tr:nth-child(even) { background: rgba(255,255,255,0.02); }
-        tr:hover { background: rgba(76, 201, 240, 0.1); }
+
+        .table-container th,
+        .table-container td {
+            padding: 16px 20px;
+            text-align: left;
+        }
+
+        .table-container th {
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .table-container tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .table-container tbody tr:last-child { border-bottom: none; }
+
+        .table-container tbody tr:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
         .text-right { text-align: right; }
-        .process-name { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
-        .process-name:hover { color: #4cc9f0; }
-        .process-name.selected { color: #4cc9f0; font-weight: bold; }
-        .bar-container { width: 80px; display: inline-block; vertical-align: middle; }
-        .bar {
-            height: 8px;
-            background: #4cc9f0;
-            border-radius: 4px;
+
+        .process-name {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .process-name:hover { color: var(--primary); }
+        .process-name.selected { color: var(--accent); }
+
+        /* Progress bar */
+        .bar-container {
+            width: 80px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
             display: inline-block;
             vertical-align: middle;
+            overflow: hidden;
         }
-        .hidden { display: none; }
-        .highlight { background: rgba(76, 201, 240, 0.3); }
 
+        .bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Chart section */
         .chart-section {
             margin-top: 30px;
-            background: #16213e;
-            border-radius: 10px;
-            padding: 20px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            animation: fadeInUp 0.6s ease-out 0.5s backwards;
         }
-        .chart-section h2 { color: #4cc9f0; margin-bottom: 15px; }
+
+        .chart-section h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
         .chart-container {
             position: relative;
             height: 400px;
         }
+
+        /* Process pills */
         .process-pills {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 10px;
+            margin-bottom: 20px;
         }
+
         .process-pill {
-            padding: 5px 12px;
-            background: #0f3460;
-            border-radius: 15px;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 20px;
             cursor: pointer;
             font-size: 13px;
-            transition: all 0.2s;
+            transition: all 0.3s;
         }
-        .process-pill:hover { background: #1a4a7a; }
-        .process-pill.active { background: #4cc9f0; color: #000; }
 
+        .process-pill:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+
+        .process-pill.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .hidden { display: none !important; }
+        .highlight {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(6, 182, 212, 0.3));
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* No data */
         .no-data {
             text-align: center;
-            padding: 40px;
-            color: #888;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-data .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 15, 26, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
 <body>
+    <div class="bg-gradient"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
     <div class="container">
-        <h1>📊 Stats - Process Traffic History</h1>
-        <p class="subtitle">查看每个应用的网络流量使用情况和趋势</p>
+        <div class="header">
+            <h1>📊 Stats Traffic Monitor</h1>
+            <p class="subtitle">实时监控应用网络流量使用情况</p>
+            <div class="refresh-indicator" id="refreshIndicator">
+                <div class="dot"></div>
+                <div class="spinner"></div>
+                <span id="refreshText">自动刷新: 10秒</span>
+            </div>
+        </div>
 
         <div class="upload-area" id="uploadArea">
             <label for="fileInput">
@@ -169,44 +623,53 @@
             </label>
             <input type="file" id="fileInput" accept=".json">
             <p>JSON 文件位置: <code>~/Library/Application Support/Stats/traffic_history.json</code></p>
-            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; align-items: center;">
-                <button id="autoLoadBtn" class="clear-btn" style="background: #4cc9f0;">🔄 自动加载最新数据</button>
-                <span id="lastLoadTime" style="font-size: 12px; color: #888;"></span>
+            <div style="margin-top: 20px; display: flex; gap: 12px; justify-content: center;">
+                <button id="autoLoadBtn" class="btn btn-primary">🔄 自动加载</button>
+                <span id="lastLoadTime" style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center;"></span>
             </div>
         </div>
 
         <div id="content" class="hidden">
-            <div style="text-align: right; margin-bottom: 10px;">
-                <button id="refreshBtn" class="clear-btn" style="background: #4cc9f0;">🔄 刷新数据</button>
-                <span id="contentLastLoad" style="font-size: 12px; color: #888; margin-left: 10px;"></span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div></div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <span id="contentLastLoad" style="font-size: 13px; color: var(--text-secondary);"></span>
+                    <button id="refreshBtn" class="btn btn-primary">🔄 刷新</button>
+                </div>
             </div>
+
             <div class="stats-grid">
                 <div class="stat-card download">
-                    <h3>📥 总下载</h3>
+                    <span class="icon">📥</span>
+                    <h3>总下载</h3>
                     <div class="value" id="totalDownload">0 B</div>
                 </div>
                 <div class="stat-card upload">
-                    <h3>📤 总上传</h3>
+                    <span class="icon">📤</span>
+                    <h3>总上传</h3>
                     <div class="value" id="totalUpload">0 B</div>
                 </div>
                 <div class="stat-card total">
-                    <h3>📊 总流量</h3>
+                    <span class="icon">📊</span>
+                    <h3>总流量</h3>
                     <div class="value" id="totalTraffic">0 B</div>
                 </div>
-                <div class="stat-card processes">
-                    <h3>🔧 进程数</h3>
+                <div class="stat-card">
+                    <span class="icon">🔧</span>
+                    <h3>进程数</h3>
                     <div class="value" id="processCount">0</div>
                 </div>
-                <div class="stat-card dates">
-                    <h3>📅 数据范围</h3>
-                    <div class="value" id="dateRange">-</div>
+                <div class="stat-card">
+                    <span class="icon">📅</span>
+                    <h3>数据范围</h3>
+                    <div class="value" id="dateRange" style="font-size: 16px;">-</div>
                 </div>
             </div>
 
             <div class="filters">
                 <div class="filter-group">
-                    <label>🔍 关键字:</label>
-                    <input type="text" id="searchInput" placeholder="搜索进程名称...">
+                    <label>🔍</label>
+                    <input type="text" id="searchInput" placeholder="搜索进程...">
                 </div>
                 <div class="filter-group">
                     <label>📅 日期:</label>
@@ -215,29 +678,31 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>⏰ 时间:</label>
+                    <label>⏰</label>
                     <input type="time" id="startTime" value="00:00">
-                    <span class="time-separator">至</span>
+                    <span style="color: var(--text-secondary);">~</span>
                     <input type="time" id="endTime" value="23:59">
                 </div>
-                <button class="clear-btn" id="clearFilters">清除筛选</button>
+                <button class="btn btn-secondary" id="clearFilters">清除筛选</button>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>进程名称</th>
-                        <th class="text-right">📥 下载</th>
-                        <th class="text-right">📤 上传</th>
-                        <th class="text-right">📊 总计</th>
-                        <th class="text-right">比例</th>
-                    </tr>
-                </thead>
-                <tbody id="processTable"></tbody>
-            </table>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>进程名称</th>
+                            <th class="text-right">📥 下载</th>
+                            <th class="text-right">📤 上传</th>
+                            <th class="text-right">📊 总计</th>
+                            <th class="text-right">比例</th>
+                        </tr>
+                    </thead>
+                    <tbody id="processTable"></tbody>
+                </table>
+            </div>
 
             <div class="chart-section" id="chartSection">
-                <h2>📈 流量趋势 (点击表格中的进程名称查看)</h2>
+                <h2>📈 流量趋势 (点击进程名称查看，最多5个)</h2>
                 <div class="process-pills" id="processPills"></div>
                 <div class="chart-container">
                     <canvas id="trendChart"></canvas>
@@ -246,20 +711,38 @@
         </div>
 
         <div id="helpText" class="upload-area" style="cursor: default;">
-            <h3 style="margin-bottom: 15px;">📖 使用说明</h3>
-            <p>1. 安装并运行 <strong>Stats.app</strong></p>
-            <p>2. 使用一段时间（至少10分钟）让它收集数据</p>
-            <p>3. 每5分钟自动保存，每10分钟生成新的数据点</p>
-            <p style="margin: 15px 0;">4. 打开本页面，拖入文件:</p>
-            <p style="margin: 5px 0;"><code>~/Library/Application Support/Stats/traffic_history.json</code></p>
-            <p style="margin-top: 15px; font-size: 13px; color: #4cc9f0;">💡 提示: 支持关键字搜索和时间范围筛选</p>
+            <h3 style="margin-bottom: 20px; color: var(--text-primary);">📖 使用说明</h3>
+            <p style="margin: 8px 0;">1. 安装并运行 <strong style="color: var(--accent);">Stats.app</strong></p>
+            <p style="margin: 8px 0;">2. 使用一段时间（至少10分钟）让它收集数据</p>
+            <p style="margin: 8px 0;">3. 每5分钟自动保存，每10分钟生成新的数据点</p>
+            <p style="margin: 20px 0 10px;">4. 打开本页面，拖入文件:</p>
+            <p style="margin: 5px 0;"><code style="background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px;">~/Library/Application Support/Stats/traffic_history.json</code></p>
+            <p style="margin-top: 20px; font-size: 13px; color: var(--accent);">💡 提示: 通过 HTTP 服务器访问时自动每10秒刷新</p>
         </div>
     </div>
 
     <script>
+        // Create particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                const colors = ['var(--primary)', 'var(--secondary)', 'var(--accent)'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
         let allData = null;
         let trendChart = null;
         let selectedProcesses = new Set();
+        let autoRefreshInterval = null;
+        let countdown = 10;
 
         function formatBytes(bytes) {
             if (bytes === 0) return '0 B';
@@ -283,6 +766,7 @@
                 try {
                     allData = JSON.parse(e.target.result);
                     displayData(allData);
+                    startAutoRefresh();
                 } catch (err) {
                     alert('解析 JSON 文件失败: ' + err.message);
                 }
@@ -295,10 +779,7 @@
             document.getElementById('helpText').classList.add('hidden');
             document.getElementById('content').classList.remove('hidden');
 
-            // Get all dates
             const dates = Object.keys(data).sort();
-
-            // Update date filter
             const dateFilter = document.getElementById('dateFilter');
             dateFilter.innerHTML = '<option value="all">全部日期</option>';
             dates.forEach(date => {
@@ -308,7 +789,6 @@
                 dateFilter.appendChild(option);
             });
 
-            // Show date range
             document.getElementById('dateRange').textContent =
                 dates.length > 0 ? `${dates[0]} ~ ${dates[dates.length-1]}` : '-';
 
@@ -325,7 +805,6 @@
             dates.forEach(date => {
                 if (!allData[date]) return;
                 Object.keys(allData[date]).forEach(timeSlot => {
-                    // timeSlot format: "19:20"
                     const slotTime = timeSlot.split(':')[0] + ':' + timeSlot.split(':')[1];
                     if (slotTime >= startTime && slotTime <= endTime) {
                         timeSlots.push({ date, timeSlot, key: `${date} ${timeSlot}` });
@@ -338,8 +817,6 @@
         function filterData() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
             const timeSlots = getAllTimeSlots();
-
-            // Aggregate data based on filters
             const processTotals = {};
 
             timeSlots.forEach(({ date, timeSlot }) => {
@@ -354,11 +831,8 @@
                 });
             });
 
-            // Filter by search term
             let filteredProcesses = Object.entries(processTotals).map(([name, data]) => ({
-                name,
-                download: data.download,
-                upload: data.upload
+                name, download: data.download, upload: data.upload
             }));
 
             if (searchTerm) {
@@ -367,18 +841,16 @@
                 );
             }
 
-            // Sort by total traffic
             filteredProcesses.sort((a, b) => (b.download + b.upload) - (a.download + a.upload));
 
-            // Calculate totals for filtered data
             const totalDownload = filteredProcesses.reduce((sum, p) => sum + p.download, 0);
             const totalUpload = filteredProcesses.reduce((sum, p) => sum + p.upload, 0);
             const totalTraffic = totalDownload + totalUpload;
 
-            // Update stats
-            document.getElementById('totalDownload').textContent = formatBytes(totalDownload);
-            document.getElementById('totalUpload').textContent = formatBytes(totalUpload);
-            document.getElementById('totalTraffic').textContent = formatBytes(totalTraffic);
+            // Animate stats update
+            animateValue('totalDownload', formatBytes(totalDownload));
+            animateValue('totalUpload', formatBytes(totalUpload));
+            animateValue('totalTraffic', formatBytes(totalTraffic));
             document.getElementById('processCount').textContent = filteredProcesses.length;
 
             renderTable(filteredProcesses, totalTraffic, searchTerm);
@@ -386,21 +858,27 @@
             updateChart();
         }
 
+        function animateValue(elementId, newValue) {
+            const el = document.getElementById(elementId);
+            el.style.transform = 'scale(1.1)';
+            el.textContent = newValue;
+            setTimeout(() => el.style.transform = 'scale(1)', 200);
+        }
+
         function renderTable(processes, totalTraffic, searchTerm) {
             const tbody = document.getElementById('processTable');
             tbody.innerHTML = '';
 
             if (processes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="no-data">没有找到匹配的数据</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="no-data"><div class="icon">📭</div>没有找到匹配的数据</td></tr>';
                 return;
             }
 
-            processes.forEach(p => {
+            processes.forEach((p, index) => {
                 const total = p.download + p.upload;
                 const percentage = totalTraffic > 0 ? (total / totalTraffic * 100).toFixed(1) : 0;
                 const barWidth = totalTraffic > 0 ? (total / totalTraffic * 100) : 0;
 
-                // Highlight search term
                 let displayName = p.name;
                 if (searchTerm) {
                     const regex = new RegExp(`(${searchTerm})`, 'gi');
@@ -408,6 +886,7 @@
                 }
 
                 const tr = document.createElement('tr');
+                tr.style.animationDelay = `${index * 0.02}s`;
                 tr.innerHTML = `
                     <td class="process-name" title="点击查看趋势" data-process="${p.name}">${displayName}</td>
                     <td class="text-right">${formatBytes(p.download)}</td>
@@ -423,7 +902,6 @@
                 tbody.appendChild(tr);
             });
 
-            // Add click handlers for process names
             document.querySelectorAll('.process-name').forEach(el => {
                 el.addEventListener('click', () => toggleProcess(el.dataset.process));
             });
@@ -453,7 +931,6 @@
                 selectedProcesses.add(processName);
             }
 
-            // Update UI
             document.querySelectorAll('.process-name').forEach(el => {
                 el.classList.toggle('selected', el.dataset.process === processName && selectedProcesses.has(processName));
             });
@@ -466,19 +943,15 @@
 
         function updateChart() {
             const timeSlots = getAllTimeSlots();
-
-            // Prepare datasets for selected processes
             const datasets = [];
-            const colors = ['#4cc9f0', '#f72585', '#7209b7', '#4895ef', '#4ade80'];
+            const colors = ['#6366f1', '#ec4899', '#06b6d4', '#10b981', '#f59e0b'];
 
             let colorIndex = 0;
             selectedProcesses.forEach(processName => {
                 const downloadData = timeSlots.map(slot => {
                     const processes = allData[slot.date][slot.timeSlot];
                     for (const [key, info] of Object.entries(processes)) {
-                        if (info.name === processName) {
-                            return info.download || 0;
-                        }
+                        if (info.name === processName) return info.download || 0;
                     }
                     return 0;
                 });
@@ -486,100 +959,56 @@
                 const uploadData = timeSlots.map(slot => {
                     const processes = allData[slot.date][slot.timeSlot];
                     for (const [key, info] of Object.entries(processes)) {
-                        if (info.name === processName) {
-                            return info.upload || 0;
-                        }
+                        if (info.name === processName) return info.upload || 0;
                     }
                     return 0;
                 });
 
-                // Download line
                 datasets.push({
                     label: `${processName} ⬇️`,
                     data: downloadData,
                     borderColor: colors[colorIndex % colors.length],
                     backgroundColor: colors[colorIndex % colors.length] + '20',
-                    fill: true,
-                    tension: 0.3,
-                    yAxisID: 'y'
+                    fill: true, tension: 0.4, yAxisID: 'y'
                 });
 
-                // Upload line (dashed)
                 datasets.push({
                     label: `${processName} ⬆️`,
                     data: uploadData,
                     borderColor: colors[colorIndex % colors.length],
                     backgroundColor: 'transparent',
-                    borderDash: [5, 5],
-                    fill: false,
-                    tension: 0.3,
-                    yAxisID: 'y'
+                    borderDash: [5, 5], fill: false, tension: 0.4, yAxisID: 'y'
                 });
 
                 colorIndex++;
             });
 
-            // Update or create chart
             const ctx = document.getElementById('trendChart').getContext('2d');
-
-            if (trendChart) {
-                trendChart.destroy();
-            }
-
-            const labels = timeSlots.map(s => s.key);
+            if (trendChart) trendChart.destroy();
 
             trendChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: datasets
-                },
+                data: { labels: timeSlots.map(s => s.key), datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: {
-                            labels: {
-                                color: '#888',
-                                usePointStyle: true
-                            }
-                        },
+                        legend: { labels: { color: '#94a3b8', usePointStyle: true } },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': ' + formatBytes(context.parsed.y);
-                                }
+                                label: ctx => ctx.dataset.label + ': ' + formatBytes(ctx.parsed.y)
                             }
                         }
                     },
                     scales: {
                         x: {
-                            ticks: {
-                                color: '#888',
-                                maxRotation: 45,
-                                maxTicksLimit: 20
-                            },
-                            grid: {
-                                color: '#333'
-                            }
+                            ticks: { color: '#94a3b8', maxRotation: 45, maxTicksLimit: 20 },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
                         },
                         y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            ticks: {
-                                color: '#888',
-                                callback: function(value) {
-                                    return formatBytesShort(value);
-                                }
-                            },
-                            grid: {
-                                color: '#333'
-                            }
+                            ticks: { color: '#94a3b8', callback: v => formatBytesShort(v) },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
                         }
                     }
                 }
@@ -595,30 +1024,27 @@
             filterData();
         }
 
-        // 自动加载功能
+        // Auto-refresh functionality
         let savedFileHandle = null;
-        let lastFilePath = null;
         const JSON_FILE = 'traffic_history.json';
 
-        // 页面加载时尝试自动加载
         async function tryAutoLoad() {
-            // 如果是通过 HTTP 服务器访问，尝试直接 fetch JSON 文件
             if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
                 await loadFromServer();
             } else {
-                // 本地文件访问，显示提示
                 const savedPath = localStorage.getItem('traffic_json_path');
                 if (savedPath) {
-                    lastFilePath = savedPath;
                     document.getElementById('lastLoadTime').textContent = '已记住文件路径，请点击按钮加载数据';
                 }
             }
         }
 
-        // 从服务器加载 JSON 文件
         async function loadFromServer() {
+            const indicator = document.getElementById('refreshIndicator');
+            indicator.classList.add('loading');
+
             try {
-                const response = await fetch(JSON_FILE);
+                const response = await fetch(JSON_FILE + '?t=' + Date.now());
                 if (!response.ok) throw new Error('文件不存在');
                 allData = await response.json();
                 displayData(allData);
@@ -627,30 +1053,44 @@
             } catch (err) {
                 console.log('自动加载失败:', err.message);
                 document.getElementById('lastLoadTime').textContent = '自动加载失败，请手动选择文件';
+            } finally {
+                indicator.classList.remove('loading');
             }
         }
 
         function updateLastLoadTime() {
             const now = new Date();
-            const timeStr = `上次加载: ${now.toLocaleTimeString()}`;
+            const timeStr = `上次更新: ${now.toLocaleTimeString()}`;
             document.getElementById('lastLoadTime').textContent = timeStr;
             const contentLastLoad = document.getElementById('contentLastLoad');
-            if (contentLastLoad) {
-                contentLastLoad.textContent = timeStr;
-            }
+            if (contentLastLoad) contentLastLoad.textContent = timeStr;
         }
 
-        // 使用 File System Access API（如果支持）或重新选择文件
+        function startAutoRefresh() {
+            if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') {
+                return; // Only auto-refresh when served via HTTP
+            }
+
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            countdown = 10;
+
+            autoRefreshInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('refreshText').textContent = `自动刷新: ${countdown}秒`;
+
+                if (countdown <= 0) {
+                    countdown = 10;
+                    loadFromServer();
+                }
+            }, 1000);
+        }
+
         async function autoLoadFile() {
-            // 尝试使用 File System Access API
             if ('showOpenFilePicker' in window) {
                 try {
                     if (!savedFileHandle) {
                         savedFileHandle = await window.showOpenFilePicker({
-                            types: [{
-                                description: 'JSON Files',
-                                accept: { 'application/json': ['.json'] }
-                            }],
+                            types: [{ description: 'JSON Files', accept: { 'application/json': ['.json'] } }],
                             startIn: 'documents'
                         });
                         savedFileHandle = savedFileHandle[0];
@@ -670,21 +1110,17 @@
                     };
                     reader.readAsText(file);
                 } catch (err) {
-                    if (err.name !== 'AbortError') {
-                        console.error('Error:', err);
-                    }
+                    if (err.name !== 'AbortError') console.error('Error:', err);
                 }
             } else {
-                // 回退到传统文件选择
                 document.getElementById('fileInput').click();
             }
         }
 
-        // 刷新数据（重新读取文件）
         async function refreshData() {
-            // 如果是通过 HTTP 服务器访问，直接 fetch
             if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
                 await loadFromServer();
+                countdown = 10; // Reset countdown on manual refresh
             } else if (savedFileHandle) {
                 try {
                     const file = await savedFileHandle.getFile();
@@ -723,9 +1159,7 @@
             uploadArea.classList.add('dragover');
         });
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
 
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
@@ -736,7 +1170,6 @@
             }
         });
 
-        // Filter event listeners
         document.getElementById('searchInput').addEventListener('input', filterData);
         document.getElementById('dateFilter').addEventListener('change', filterData);
         document.getElementById('startTime').addEventListener('change', filterData);
@@ -745,7 +1178,7 @@
         document.getElementById('autoLoadBtn').addEventListener('click', autoLoadFile);
         document.getElementById('refreshBtn').addEventListener('click', refreshData);
 
-        // 页面加载时尝试自动加载
+        // Initial load
         tryAutoLoad();
     </script>
 </body>
