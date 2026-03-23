@@ -279,8 +279,8 @@ private class SetupView_2: NSStackView {
 private class SetupView_3: NSStackView {
     private var value: AppUpdateInterval {
         get {
-            let value = Store.shared.string(key: "update-interval", defaultValue: AppUpdateInterval.silent.rawValue)
-            return AppUpdateInterval(rawValue: value) ?? AppUpdateInterval.silent
+            let value = Store.shared.string(key: "update-interval", defaultValue: AppUpdateInterval.never.rawValue)
+            return AppUpdateInterval(rawValue: value) ?? AppUpdateInterval.never
         }
     }
     
