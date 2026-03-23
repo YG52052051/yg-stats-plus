@@ -125,50 +125,6 @@
             font-size: 1rem;
         }
 
-        /* Auto-refresh indicator */
-        .refresh-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: var(--bg-card);
-            border-radius: 20px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 15px;
-            border: 1px solid var(--border);
-        }
-
-        .refresh-indicator .dot {
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.3); opacity: 0.7; }
-        }
-
-        .refresh-indicator .spinner {
-            width: 14px;
-            height: 14px;
-            border: 2px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
-
-        .refresh-indicator.loading .spinner { display: block; }
-        .refresh-indicator.loading .dot { display: none; }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
         /* Upload area with glassmorphism */
         .upload-area {
             background: var(--bg-card);
@@ -612,11 +568,6 @@
         <div class="header">
             <h1>📊 Stats Traffic Monitor</h1>
             <p class="subtitle">实时监控应用网络流量使用情况</p>
-            <div class="refresh-indicator" id="refreshIndicator">
-                <div class="dot"></div>
-                <div class="spinner"></div>
-                <span id="refreshText">自动刷新: 10秒</span>
-            </div>
         </div>
 
         <div class="upload-area" id="uploadArea">
@@ -743,8 +694,6 @@
         let allData = null;
         let trendChart = null;
         let selectedProcesses = new Set();
-        let autoRefreshInterval = null;
-        let countdown = 10;
 
         function formatBytes(bytes) {
             if (bytes === 0) return '0 B';
@@ -768,7 +717,6 @@
                 try {
                     allData = JSON.parse(e.target.result);
                     displayData(allData);
-                    startAutoRefresh();
                 } catch (err) {
                     alert('解析 JSON 文件失败: ' + err.message);
                 }
@@ -1051,7 +999,6 @@
                 allData = await response.json();
                 displayData(allData);
                 updateLastLoadTime();
-                startAutoRefresh();
                 console.log('自动加载成功');
             } catch (err) {
                 console.log('自动加载失败:', err.message);
@@ -1067,25 +1014,6 @@
             document.getElementById('lastLoadTime').textContent = timeStr;
             const contentLastLoad = document.getElementById('contentLastLoad');
             if (contentLastLoad) contentLastLoad.textContent = timeStr;
-        }
-
-        function startAutoRefresh() {
-            if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') {
-                return; // Only auto-refresh when served via HTTP
-            }
-
-            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-            countdown = 10;
-
-            autoRefreshInterval = setInterval(() => {
-                countdown--;
-                document.getElementById('refreshText').textContent = `自动刷新: ${countdown}秒`;
-
-                if (countdown <= 0) {
-                    countdown = 10;
-                    loadFromServer();
-                }
-            }, 1000);
         }
 
         async function autoLoadFile() {
@@ -1123,8 +1051,6 @@
         async function refreshData() {
             if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
                 await loadFromServer();
-                countdown = 10;
-                document.getElementById('refreshText').textContent = `自动刷新: ${countdown}秒`;
             } else if (savedFileHandle) {
                 try {
                     const file = await savedFileHandle.getFile();
