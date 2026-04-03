@@ -739,6 +739,13 @@
                 dateFilter.appendChild(option);
             });
 
+            // 默认选中今天的日期
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            if (dates.includes(todayStr)) {
+                dateFilter.value = todayStr;
+            }
+
             document.getElementById('dateRange').textContent =
                 dates.length > 0 ? `${dates[0]} ~ ${dates[dates.length-1]}` : '-';
 
