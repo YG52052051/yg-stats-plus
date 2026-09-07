@@ -736,6 +736,13 @@ public class ProcessReader: Reader<[Network_Process]> {
                 process.name = nameArray.dropLast().joined(separator: ".")
             }
 
+            // nettop 上报的是可执行文件名。npm 生态打包的 CLI 常带跨平台 .exe 后缀
+            // （如 @anthropic-ai/claude-code 的原生二进制就叫 claude.exe，实为 Mach-O），
+            // 对 macOS 用户有误导性，统一剥掉。
+            if process.name.hasSuffix(".exe") {
+                process.name = String(process.name.dropLast(4))
+            }
+
             if process.name == "" {
                 process.name = "\(process.pid)"
             }
@@ -826,12 +833,21 @@ public class ProcessReader: Reader<[Network_Process]> {
         guard let supportPath = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appendingPathComponent("Stats") else { return }
 
         try? fileManager.createDirectory(at: supportPath, withIntermediateDirectories: true, attributes: nil)
-        let filePath = supportPath.appendingPathComponent("traffic_history.json")
 
         do {
             var allData: [String: [String: ProcessTrafficBucket]] = [:]
 
-            // 读取现有数据
+            // 按月分片：只读写当前月份的文件（traffic_history_YYYY-MM.json），
+            // 历史月份文件永不触碰。相比旧的单文件全量重写（167MB 时每 5 分钟
+            // 读写一遍全史），写入量与文件大小都恒定在单月规模（~35MB）。
+            let parts = self.currentTimeSlotKey.split(separator: "|")
+            guard parts.count >= 3 else { return }
+            let date = String(parts[1])
+            let timeSlot = String(parts[2])
+            let month = String(date.prefix(7))
+            let filePath = supportPath.appendingPathComponent("traffic_history_\(month).json")
+
+            // 读取现有数据（仅当月分片）
             if fileManager.fileExists(atPath: filePath.path),
                let existingData = fileManager.contents(atPath: filePath.path),
                let existing = try? JSONDecoder().decode([String: [String: ProcessTrafficBucket]].self, from: existingData) {
@@ -839,21 +855,35 @@ public class ProcessReader: Reader<[Network_Process]> {
             }
 
             // 添加/更新当前时间槽的数据
-            let parts = self.currentTimeSlotKey.split(separator: "|")
-            if parts.count >= 3 {
-                let date = String(parts[1])
-                let timeSlot = String(parts[2])
-                if allData[date] == nil {
-                    allData[date] = [:]
-                }
-                allData[date]?[timeSlot] = self.currentBucket
+            if allData[date] == nil {
+                allData[date] = [:]
             }
+            allData[date]?[timeSlot] = self.currentBucket
 
-            // 保存到文件
+            // 先写临时文件再原子替换，避免写一半崩溃导致 json 损坏
             let encoder = JSONEncoder()
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
             let jsonData = try encoder.encode(allData)
-            try jsonData.write(to: filePath)
+            let tmpPath = supportPath.appendingPathComponent("traffic_history_\(month).json.tmp")
+            try jsonData.write(to: tmpPath)
+            _ = try fileManager.replaceItemAt(filePath, withItemAt: tmpPath)
+
+            // 维护月份清单（traffic_months.json）：viewer 靠它发现全部分片。
+            // 内容随月份集合变化才不同，逐字节比对避免每 5 分钟无谓重写。
+            let monthFiles = ((try? fileManager.contentsOfDirectory(
+                at: supportPath, includingPropertiesForKeys: nil
+            )) ?? [])
+                .map(\.lastPathComponent)
+                .filter { $0.hasPrefix("traffic_history_") && $0.hasSuffix(".json") }
+                .sorted()
+            let manifestPath = supportPath.appendingPathComponent("traffic_months.json")
+            if let manifestData = try? JSONEncoder().encode(monthFiles),
+               let existing = fileManager.contents(atPath: manifestPath.path),
+               existing != manifestData {
+                try manifestData.write(to: manifestPath)
+            } else if !fileManager.fileExists(atPath: manifestPath.path) {
+                try? JSONEncoder().encode(monthFiles).write(to: manifestPath)
+            }
         } catch {
             debug("Failed to export traffic history to JSON: \(error)")
         }

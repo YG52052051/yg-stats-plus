@@ -779,7 +779,11 @@
             timeSlots.forEach(({ date, timeSlot }) => {
                 const processes = allData[date][timeSlot];
                 Object.entries(processes).forEach(([key, info]) => {
-                    const name = info.name || key;
+                    // 归一化：历史数据里 nettop 记的可执行文件名带 .exe 后缀
+                    // （如 claude.exe，实为 Mac 上的 Mach-O），展示层统一剥掉。
+                    // 只影响显示聚合，不改动数据文件本身。
+                    let name = info.name || key;
+                    if (name.endsWith('.exe')) name = name.slice(0, -4);
                     if (!processTotals[name]) {
                         processTotals[name] = { download: 0, upload: 0 };
                     }
@@ -908,7 +912,10 @@
                 const downloadData = timeSlots.map(slot => {
                     const processes = allData[slot.date][slot.timeSlot];
                     for (const [key, info] of Object.entries(processes)) {
-                        if (info.name === processName) return info.download || 0;
+                        // 与 filterData 同步归一化：选中的 claude 要能匹配历史键 claude.exe
+                        let n = info.name || key;
+                        if (n.endsWith('.exe')) n = n.slice(0, -4);
+                        if (n === processName) return info.download || 0;
                     }
                     return 0;
                 });
@@ -916,7 +923,9 @@
                 const uploadData = timeSlots.map(slot => {
                     const processes = allData[slot.date][slot.timeSlot];
                     for (const [key, info] of Object.entries(processes)) {
-                        if (info.name === processName) return info.upload || 0;
+                        let n = info.name || key;
+                        if (n.endsWith('.exe')) n = n.slice(0, -4);
+                        if (n === processName) return info.upload || 0;
                     }
                     return 0;
                 });
@@ -985,6 +994,51 @@
         let savedFileHandle = null;
         const JSON_FILE = 'traffic_history.json';
 
+        // 数据按月分片为 traffic_history_YYYY-MM.json（写入端只重写当月，历史月份不可变）。
+        // 这里用月份清单发现分片：清单文件存在 → 逐月加载合并；不存在 → 回退旧单文件。
+        const MONTHS_MANIFEST = 'traffic_months.json';
+
+        function currentMonthName() {
+            const d = new Date();
+            return `traffic_history_${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}.json`;
+        }
+
+        async function loadFromServer() {
+            try {
+                let months = null;
+                try {
+                    const mf = await fetch(MONTHS_MANIFEST + '?t=' + Date.now());
+                    if (mf.ok) months = await mf.json();
+                } catch (_) { /* 清单不可用时回退单文件 */ }
+
+                if (Array.isArray(months) && months.length > 0) {
+                    // 分片模式：逐月 fetch，单月失败不阻断整体（跳过该月并提示）
+                    allData = {};
+                    let failed = [];
+                    for (const m of months) {
+                        try {
+                            const r = await fetch(m + '?t=' + Date.now());
+                            if (!r.ok) { failed.push(m); continue; }
+                            Object.assign(allData, await r.json());
+                        } catch (_) { failed.push(m); }
+                    }
+                    if (failed.length) console.warn('以下月份加载失败已跳过:', failed);
+                    if (Object.keys(allData).length === 0) throw new Error('所有月份均加载失败');
+                } else {
+                    // 回退：旧单文件模式
+                    const response = await fetch(JSON_FILE + '?t=' + Date.now());
+                    if (!response.ok) throw new Error('文件不存在');
+                    allData = await response.json();
+                }
+                displayData(allData);
+                updateLastLoadTime();
+                console.log('自动加载成功');
+            } catch (err) {
+                console.log('自动加载失败:', err.message);
+                document.getElementById('lastLoadTime').textContent = '自动加载失败，请手动选择文件';
+            }
+        }
+
         async function tryAutoLoad() {
             if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
                 await loadFromServer();
@@ -993,20 +1047,6 @@
                 if (savedPath) {
                     document.getElementById('lastLoadTime').textContent = '已记住文件路径，请点击按钮加载数据';
                 }
-            }
-        }
-
-        async function loadFromServer() {
-            try {
-                const response = await fetch(JSON_FILE + '?t=' + Date.now());
-                if (!response.ok) throw new Error('文件不存在');
-                allData = await response.json();
-                displayData(allData);
-                updateLastLoadTime();
-                console.log('自动加载成功');
-            } catch (err) {
-                console.log('自动加载失败:', err.message);
-                document.getElementById('lastLoadTime').textContent = '自动加载失败，请手动选择文件';
             }
         }
 
